@@ -431,6 +431,9 @@
     for (i = 0; i < n; i++) {
       S.streaks.push({ u: (r() - 0.5) * 0.9, len: 40 + r() * 170, v: 520 + r() * 520, ph: r() * 100000, w: 0.8 + r() * 2.6, a: 0.25 + r() * 0.55, c: r() < 0.5 ? 0 : 1 });
     }
+    S.codes = []; S.codeAcc = 0; S.lineAcc = 0; S.lastT = 0;
+    S.glyphs = [];
+    for (i = 0; i < 34; i++) S.glyphs.push({ u: (r() - 0.5) * 0.7, v: 160 + r() * 260, ph: r() * 100000, k: r() * 100 });
     S.packets = [];
     for (i = 0; i < 26; i++) S.packets.push({ u: (r() - 0.5) * 0.5, v: 240 + r() * 260, ph: r() * 100000, len: 8 + r() * 12 });
     S.lights = [];
@@ -607,6 +610,7 @@
         c.fillStyle = 'rgba(255,196,150,.95)';
         c.fillRect(px - 1.5, sy2 - pk.len / 2, 3, pk.len);
       }
+      drawCodes(c, t, cam, g, y0, y1, extra);
     }
     // spill glow
     var sp = S.spill.y - cam;
@@ -633,6 +637,68 @@
       }
     }
     c.globalCompositeOperation = 'source-over';
+  }
+
+  // ───────────────────────────────── code emitted by the data stream
+  var MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace';
+  var TOKENS = ['</>', '{ }', '01', '10', '=>', '&&', '#', '0x2F', 'AI', 'if', 'for', 'def', 'git', 'npm', 'SQL', 'API', '[ ]', '++', '::', 'λ', '&lt;/&gt;', 'true', 'null', '404', '200 OK', 'push()', 'ssh', 'IoT', 'GPU', 'UI'];
+  TOKENS[20] = '<div>';
+  var LINES = ['while (curious) build();', 'const techno = new Idea();', 'git commit -m "impact"', 'def learn(): return apply()',
+    'if (idea) { launch(); }', 'SELECT * FROM members;', 'model.fit(ideas)', 'for e in events: join(e)', 'npm run november',
+    'import { future } from "techno";', 'await team.ship()', 'print("hello, TECHNO")', '<Workshop for="community" />', 'ping utas.edu.om'];
+  var BEAM = '01<>{}[]/#=+*;:$%&|';
+  function rnd() { return Math.random(); }
+  function drawCodes(c, t, cam, g, y0, y1, extra) {
+    if (S.reduced || y1 <= y0) return;
+    var now = t, dt = S.lastT ? Math.min(0.05, Math.max(0, now - S.lastT)) : 0; S.lastT = now;
+    var H = S.H, lite = S.lite;
+    // emit: short tokens often, a typed line now and then
+    S.codeAcc += dt * (lite ? 4 : 9); S.lineAcc += dt * (lite ? 0.35 : 0.7);
+    function spawn(text, line) {
+      var y = y0 + rnd() * (y1 - y0);
+      if (y < S.spill.y + 40 || y > S.endY - 40) return;
+      var side = rnd() < 0.5 ? -1 : 1;
+      S.codes.push({ text: text, line: line, y: y, side: side, off: g * (0.35 + rnd() * 0.2), vx: side * (line ? 26 + rnd() * 20 : 34 + rnd() * 46),
+        vy: 10 + rnd() * 26, age: 0, life: line ? 4.2 + rnd() * 1.5 : 2.2 + rnd() * 1.6, size: line ? 15 : 12 + rnd() * 7, hot: rnd() < 0.18, dx: 0 });
+    }
+    while (S.codeAcc >= 1) { S.codeAcc -= 1; if (S.codes.length < 70) spawn(TOKENS[(rnd() * TOKENS.length) | 0], false); }
+    while (S.lineAcc >= 1) { S.lineAcc -= 1; if (S.codes.length < 70) spawn(LINES[(rnd() * LINES.length) | 0], true); }
+    c.save();
+    c.direction = 'ltr'; // code reads left to right even though the page is RTL
+    c.globalCompositeOperation = 'lighter';
+    c.textBaseline = 'middle';
+    for (var i = S.codes.length - 1; i >= 0; i--) {
+      var o = S.codes[i];
+      o.age += dt; o.dx += o.vx * dt; o.y += o.vy * dt;
+      if (o.age > o.life || o.y > S.endY) { S.codes.splice(i, 1); continue; }
+      var sy = o.y - cam; if (sy < -extra - 40 || sy > H + extra + 40) continue;
+      var a = Math.min(1, o.age / 0.25) * (1 - Math.max(0, (o.age - o.life * 0.6) / (o.life * 0.4)));
+      var x = xAt(o.y) + o.side * o.off + o.dx;
+      var txt = o.text;
+      if (o.line) { // typed out letter by letter, with a blinking cursor while typing
+        var n = Math.min(txt.length, Math.floor(o.age / 0.045));
+        txt = txt.slice(0, n) + ((n < o.text.length || Math.floor(o.age * 3) % 2 === 0) ? '▌' : '');
+      }
+      c.font = (o.line ? '500 ' : '600 ') + o.size + 'px ' + MONO;
+      c.textAlign = o.side < 0 ? 'right' : 'left';
+      var col = o.hot ? '255,170,110' : (o.line ? '190,210,255' : '150,185,255');
+      if (!lite) { c.shadowColor = 'rgba(' + col + ',.9)'; c.shadowBlur = o.line ? 10 : 8; }
+      c.fillStyle = 'rgba(' + col + ',' + (a * (o.line ? 0.9 : 0.75)).toFixed(3) + ')';
+      c.fillText(txt, x, sy);
+    }
+    c.shadowBlur = 0;
+    // characters running down inside the beam
+    var P = H + 400, base = cam - 200;
+    c.font = '600 11px ' + MONO; c.textAlign = 'center';
+    for (var k = 0; k < S.glyphs.length; k += (lite ? 2 : 1)) {
+      var gl = S.glyphs[k];
+      var yy = base + ((((t * gl.v + gl.ph) % P) + P) % P);
+      if (yy < S.spill.y + 30 || yy > S.endY - 10) continue;
+      var ch = BEAM.charAt(Math.floor(t * 6 + gl.k) % BEAM.length);
+      c.fillStyle = 'rgba(235,242,255,.55)';
+      c.fillText(ch, xAt(yy) + gl.u * g, yy - cam);
+    }
+    c.restore();
   }
 
   function radial(c, x, y, r, col, a) {
