@@ -35,7 +35,6 @@ once Pages is enabled: **Settings → Pages → Source: GitHub Actions**.
   Put the Google Form link for each committee in `forms`, and the QR code is generated automatically.
 - **Scene text:** `index.html`. Each scene is one `<section>`.
   - The presenter notes are in `data-notes`.
-  - The mascot's line is in `data-mascot`.
 - **Steps:** any element with `data-step="n"` appears on press n of that scene.
 
 ## Files
@@ -45,7 +44,7 @@ once Pages is enabled: **Settings → Pages → Source: GitHub Actions**.
 - `js/icons.js`: icons.
 - `assets/`:
   - The Alexandria and IBM Plex Sans Arabic fonts.
-  - The TECHNO logo and mascot (from the game-1 repository).
+  - The TECHNO logo (from the game-1 repository).
   - The Scientific Club logo (a white version for dark backgrounds).
   - The two posters (from the workshops file).
 - `vendor/qrcode.js`: Kazuhiko Arase's QR generator (MIT licence).

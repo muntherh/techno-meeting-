@@ -1,5 +1,5 @@
 /*
- * The deck: camera, steps, input, HUD, overview, presenter notes/window, mascot guide.
+ * The deck: camera, steps, input, HUD, overview, presenter notes/window.
  * Deck mode (≥ 700 × 460): one scene per screen, every click reveals one element, the camera glides down between
  * scenes. Flow mode (phones): the same world scrolls natively and each scene reveals itself when it comes into view.
  */
@@ -161,7 +161,6 @@
   function arrive(i) {
     scenes.forEach(function (s, k) { if (k !== i) s.classList.remove('is-here'); });
     scenes[i].classList.add('is-here');
-    mascotFor(i);
     syncUi();
   }
   function go(i, step, opts) {
@@ -180,7 +179,6 @@
       scenes[prev] && scenes[prev] !== scenes[i] && setSteps(prev, 0, true);
       return;
     }
-    mascotRide(prev, i);
     travelTo(i, function () { arrive(i); setSteps(prev, prev === i ? step : 0, true); });
     syncUi();
   }
@@ -338,30 +336,6 @@
     pw.document.getElementById('t').textContent = two(Math.floor(s / 60)) + ':' + two(s % 60);
   }, 1000);
 
-  // ───────────────────────────── mascot
-  var mascot = $('#mascot'), bubble = $('.bubble', mascot), mascotLine = '', bubbleT = 0;
-  function mascotFor(i) {
-    var line = scenes[i].getAttribute('data-mascot');
-    mascot.classList.remove('ride');
-    if (line) {
-      if (!mascot.classList.contains('show') || line !== mascotLine) {
-        mascotLine = line;
-        bubble.classList.remove('pop');
-        mascot.classList.add('show');
-        clearTimeout(bubbleT);
-        bubbleT = setTimeout(function () { bubble.textContent = line; bubble.classList.add('pop'); }, reduced ? 0 : 650);
-      }
-    } else {
-      mascot.classList.remove('show'); bubble.classList.remove('pop'); mascotLine = '';
-    }
-  }
-  function mascotRide(from, to) {
-    var a = scenes[from] && scenes[from].getAttribute('data-mascot'), b = scenes[to].getAttribute('data-mascot');
-    bubble.classList.remove('pop');
-    if (a && b) mascot.classList.add('ride');
-    else mascot.classList.remove('show');
-  }
-
   // ───────────────────────────── input
   function onKey(e) {
     var k = e.key;
@@ -459,7 +433,6 @@
       if (en.isIntersecting) flowReveal(en.target);
     });
     syncUi();
-    var i2 = currentFlowIdx(); mascotFor(i2);
   }, { threshold: 0.2 });
   scenes.forEach(function (s) { io.observe(s); });
 
@@ -507,11 +480,6 @@
     }
     TMWorld.frame(now, st.cam, travel);
     perf(now);
-    // mascot leans towards the pointer
-    if (st.pointer.x >= 0) {
-      var lean = Math.max(-1, Math.min(1, (st.pointer.x - st.W * 0.12) / (st.W * 0.5)));
-      mascot.style.setProperty('--lean', lean.toFixed(3));
-    }
     requestAnimationFrame(loop);
   }
 
