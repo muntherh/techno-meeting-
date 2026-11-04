@@ -557,3 +557,25 @@ html.flow .report { flex-wrap: wrap; white-space: normal; }
 .holo { animation: holo 4.5s ease-in-out infinite; }
 @keyframes holo { 0%, 100% { opacity: .85; } 45% { opacity: .55; } 50% { opacity: .9; } }
 html.lite .holo { animation: none !important; }
+
+/* TECHNO logo cloth (opening) */
+.cloth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; touch-action: pan-y; -webkit-tap-highlight-color: transparent; outline: none; }
+.cloth.is-over { cursor: grab; }
+.cloth.is-held { cursor: grabbing; }
+.cloth:focus-visible { outline: 2px solid var(--sky); outline-offset: -6px; }
+.s-open .content { z-index: 1; pointer-events: none; }
+.s-open.no-cloth .cloth { display: none; }
+html.has-cloth .planet .orb, html.has-cloth .planet .techno-logo, html.has-cloth .planet .ring { display: none; }
+body:not(.ui-on) .cloth.is-over, body:not(.ui-on) .cloth.is-held { cursor: grab; }
+
+/* opening with the cloth: TECHNO cloth on the left, title on the right */
+html.has-cloth.deck .c-open { align-items: flex-start; text-align: start; justify-content: center; }
+html.has-cloth.deck .c-open .open-top { position: absolute; top: 0; inset-inline-start: calc(var(--u) * 6); }
+html.has-cloth.deck .c-open .open-title { margin-top: 0; align-items: flex-start; width: 46%; margin-inline-start: 0; }
+html.has-cloth.deck .c-open .open-title::before { inset: -40% -25%; }
+html.has-cloth.deck .c-open .title.xl { font-size: calc(var(--u) * 4.6); white-space: nowrap; }
+html.has-cloth.deck .start-hint { left: auto; right: calc(var(--u) * 6); text-align: start; }
+html.has-cloth.deck .spill { transform: translate(calc(var(--sw) * -0.18 - var(--sh) * 0.2), calc(var(--sh) * 0.36)); }
+html.has-cloth.flow .c-open { justify-content: flex-end; }
+html.has-cloth.flow .s-open { min-height: 100svh; }
+html.has-cloth.flow .c-open { min-height: 80svh; }

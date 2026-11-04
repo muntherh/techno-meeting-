@@ -417,6 +417,7 @@
   addEventListener('touchstart', function (e) { if (st.deck) ty0 = e.touches[0].clientY; }, { passive: true });
   addEventListener('touchend', function (e) {
     if (!st.deck || ty0 == null) return;
+    if (window.TMCloth && TMCloth.busy()) { ty0 = null; return; }
     var dy = ty0 - e.changedTouches[0].clientY; ty0 = null;
     if (Math.abs(dy) > 50) { if (dy > 0) next(); else prev(); }
   }, { passive: true });
@@ -428,6 +429,7 @@
       help: function () { if (st.overlay === helpEl) closeOverlay(); else openOverlay(helpEl); } })[b.getAttribute('data-cmd')]();
   });
   doc.addEventListener('click', function (e) {
+    if (window.TMCloth && TMCloth.busy()) return; // that press was a drag of the logo cloth
     if (e.target.closest('#controls, #gauge, #overview .ov-item, #notes, a, button')) return;
     var z = e.target.closest('[data-zoom]');
     if (z) { zoom($('img', z).src); return; }

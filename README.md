@@ -42,6 +42,7 @@ once Pages is enabled: **Settings → Pages → Source: GitHub Actions**.
 - `js/world.js`: the world (data stream, circuit-board layers, server walls, parallax).
 - `js/deck.js`: camera, steps, controls and windows.
 - `js/icons.js`: icons.
+- `js/cloth.js` + `js/logo-data.js`: the TECHNO logo as a hanging holographic cloth on the opening scene (WebGL; drag it with the mouse or a finger; the static logo is shown if WebGL is unavailable).
 - `assets/`:
   - The Alexandria and IBM Plex Sans Arabic fonts.
   - The TECHNO logo (from the game-1 repository).
