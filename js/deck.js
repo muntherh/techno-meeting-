@@ -408,6 +408,7 @@
       case '?': case '/': case 'h': case 'H':
         if (st.overlay === helpEl) closeOverlay(); else openOverlay(helpEl); break;
       case 'l': case 'L': case 'م': setLite(!root.classList.contains('lite'), false); break;
+      case 't': case 'T': case 'ف': toggleTheme(); break;
       case 'Escape': closeOverlay(); break;
       default: return;
     }
@@ -447,7 +448,7 @@
   ctrl.addEventListener('click', function (e) {
     var b = e.target.closest('[data-cmd]'); if (!b) return;
     e.stopPropagation();
-    ({ prev: prev, next: next, overview: overview, notes: toggleNotes, presenter: presenter, fullscreen: fullscreen,
+    ({ prev: prev, next: next, overview: overview, notes: toggleNotes, presenter: presenter, fullscreen: fullscreen, theme: toggleTheme,
       help: function () { if (st.overlay === helpEl) closeOverlay(); else openOverlay(helpEl); } })[b.getAttribute('data-cmd')]();
   });
   doc.addEventListener('click', function (e) {
@@ -478,6 +479,22 @@
     syncUi();
   }, { threshold: 0.2 });
   scenes.forEach(function (s) { io.observe(s); });
+
+  // ───────────────────────────── colour theme: TECHNO (default) or Scientific Club
+  var THEME_KEY = 'techno.meeting.theme';
+  function savedTheme() {
+    var q = /[?&]theme=(\w+)/.exec(location.search); if (q) return q[1];
+    try { var v = localStorage.getItem(THEME_KEY); if (v) return v; } catch (e) { /* storage blocked */ }
+    return SET.theme || 'techno';
+  }
+  function applyTheme(name, announce) {
+    name = name === 'club' ? 'club' : 'techno';
+    if (name === 'club') root.setAttribute('data-theme', 'club'); else root.removeAttribute('data-theme');
+    TMWorld.setTheme(name);
+    try { localStorage.setItem(THEME_KEY, name); } catch (e) { /* storage blocked */ }
+    if (announce) { layout(); toast(name === 'club' ? 'الألوان: النادي العلمي' : 'الألوان: تكنو'); }
+  }
+  function toggleTheme() { applyTheme(root.getAttribute('data-theme') === 'club' ? 'techno' : 'club', true); }
 
   // ───────────────────────────── low-power mode (L, ?lite=1, or automatic on a slow machine)
   var perfS = { t0: 0, n: 0, slow: 0, done: false };
@@ -536,6 +553,7 @@
     TMIcons.hydrate();
     decorate();
     TMWorld.init({ scenes: scenes, back: back, far: $('#far'), near: $('#near'), bg: $('#bg'), fx: $('#fx') });
+    applyTheme(savedTheme(), false);
     var h = (location.hash || '').replace('#', '').split('.');
     var i0 = Math.max(0, Math.min(N - 1, (parseInt(h[0], 10) || 1) - 1)), s0 = parseInt(h[1], 10) || 0;
     st.idx = i0; st.step = Math.min(maxStep[i0], s0);

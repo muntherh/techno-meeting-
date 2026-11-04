@@ -23,6 +23,7 @@ once Pages is enabled: **Settings → Pages → Source: GitHub Actions**.
 | `Z` | Enlarge the scene's poster |
 | `B` | Black screen |
 | `L` | Light performance mode (for slow laptops; it switches on by itself if the device is slow) |
+| `T` / the palette button | Switch colours: TECHNO / Scientific Club (remembered; default in `settings.js` → `theme`) |
 | `Home` / `End` | Start / end |
 | `?` | Shortcuts |
 

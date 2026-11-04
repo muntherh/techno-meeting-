@@ -16,6 +16,32 @@
     mint: '#3a74ff', teal: '#2d5ef0', blue: '#2f6bff', royal: '#1d3fae', sky: '#ff8a3d',
     ice: '#e6eeff', aqua: '#8fb4ff'
   };
+  // Two palettes: TECHNO (default) and the Scientific Club. setTheme() swaps them and the deck rebuilds the world.
+  var THEMES = {
+    techno: {
+      C: { mint: '#3a74ff', teal: '#2d5ef0', blue: '#2f6bff', royal: '#1d3fae', sky: '#ff8a3d', ice: '#e6eeff', aqua: '#8fb4ff' },
+      depth: [[0, '#05081a', '#0b1236'], [1, '#060a1f', '#101a44'], [2, '#03040b', '#070a1a'], [5, '#03040b', '#080b1e'], [6, '#040510', '#0b0d24'],
+        [10, '#040510', '#0b0d22'], [11, '#030409', '#0a0f2a'], [14, '#030409', '#0a0e26'], [15, '#04060f', '#0d1434']],
+      mote: '150,180,255', moteWarm: '255,150,80',
+      spr: [[[0, 'rgba(230,238,255,0)'], [0.4, 'rgba(236,242,255,.95)'], [1, 'rgba(143,180,255,0)']], [[0, 'rgba(70,120,255,0)'], [0.5, 'rgba(120,160,255,.85)'], [1, 'rgba(255,138,61,0)']]],
+      band: '58,116,255', bandLine: '200,218,255', pulse: '255,214,180', pulseGlow: [255, 138, 61],
+      passes: ['rgba(45,94,240,.08)', 'rgba(58,116,255,.16)', 'rgba(120,160,255,.22)', 'rgba(236,242,255,.55)'],
+      streakA: 'rgba(236,242,255,.9)', streakB: 'rgba(120,160,255,.8)', packet: 'rgba(255,196,150,.95)', packetGlow: [255, 138, 61],
+      spill: [143, 180, 255], codeTok: '150,185,255', codeLine: '190,210,255', codeHot: '255,170,110'
+    },
+    club: {
+      C: { mint: '#1fd4a0', teal: '#03aea9', blue: '#007db9', royal: '#0144bb', sky: '#2a6fe0', ice: '#bffcf1', aqua: '#5ff0d2' },
+      depth: [[0, '#081a4a', '#0c3b6c'], [1, '#0a2a5c', '#0f5a78'], [2, '#050d29', '#071a3e'], [5, '#050c26', '#08183c'], [6, '#04122a', '#06283a'],
+        [10, '#05132b', '#062636'], [11, '#060b29', '#0a1a50'], [14, '#050a26', '#0a184a'], [15, '#03112a', '#063244']],
+      mote: '150,255,226', moteWarm: '120,190,255',
+      spr: [[[0, 'rgba(191,252,241,0)'], [0.4, 'rgba(225,255,250,.95)'], [1, 'rgba(95,240,210,0)']], [[0, 'rgba(90,170,255,0)'], [0.5, 'rgba(140,215,255,.85)'], [1, 'rgba(42,111,224,0)']]],
+      band: '31,212,160', bandLine: '210,255,246', pulse: '220,255,248', pulseGlow: [95, 240, 210],
+      passes: ['rgba(3,174,169,.08)', 'rgba(31,212,160,.16)', 'rgba(120,240,220,.22)', 'rgba(225,255,250,.55)'],
+      streakA: 'rgba(225,255,250,.9)', streakB: 'rgba(140,215,255,.8)', packet: 'rgba(220,255,248,.95)', packetGlow: [95, 240, 210],
+      spill: [95, 240, 210], codeTok: '140,240,215', codeLine: '200,255,240', codeHot: '140,200,255'
+    }
+  };
+  var TH = THEMES.techno;
   var FAR_F = 0.55, NEAR_F = 1.32;
 
   function rngOf(seed) {
@@ -56,19 +82,14 @@
     dprBg: 1, dprFx: 1, lastNow: 0
   };
 
-  // Depth palette keyed by scene position p (0 = first scene).
-  var DEPTH = [
-    [0, '#05081a', '#0b1236'],
-    [1, '#060a1f', '#101a44'],
-    [2, '#03040b', '#070a1a'],
-    [5, '#03040b', '#080b1e'],
-    [6, '#040510', '#0b0d24'],
-    [10, '#040510', '#0b0d22'],
-    [11, '#030409', '#0a0f2a'],
-    [14, '#030409', '#0a0e26'],
-    [15, '#04060f', '#0d1434']
-  ].map(function (d) { return [d[0], hex(d[1]), hex(d[2])]; });
 
+  var DEPTH = TH.depth.map(function (d) { return [d[0], hex(d[1]), hex(d[2])]; });
+  function setTheme(name) {
+    TH = THEMES[name] || THEMES.techno;
+    for (var k in TH.C) C[k] = TH.C[k];
+    DEPTH = TH.depth.map(function (d) { return [d[0], hex(d[1]), hex(d[2])]; });
+    SPR = null;
+  }
   function depthColors(p) {
     for (var i = 0; i < DEPTH.length - 1; i++) {
       var a = DEPTH[i], b = DEPTH[i + 1];
@@ -512,7 +533,7 @@
       var my = ((mo.v * H - cam * mo.f - t * 12 * mo.sp) % H + H) % H;
       var mx = mo.u * W + Math.sin(t * 0.4 * mo.sp + mo.ph) * 18;
       var a = (0.18 + 0.3 * (0.5 + 0.5 * Math.sin(t * 1.2 + mo.ph))) * (mo.l === 2 ? 1 : 0.7);
-      c.fillStyle = mo.l === 1 ? 'rgba(255,150,80,' + a + ')' : 'rgba(150,180,255,' + a + ')';
+      c.fillStyle = 'rgba(' + (mo.l === 1 ? TH.moteWarm : TH.mote) + ',' + a + ')';
       c.beginPath(); c.arc(mx, my, mo.s * (1 + travel * (mo.l === 2 ? 1.5 : 0.4)), 0, 6.283); c.fill();
     }
     c.globalCompositeOperation = 'source-over';
@@ -527,10 +548,7 @@
       stops.forEach(function (s) { g.addColorStop(s[0], s[1]); });
       x.fillStyle = g; x.fillRect(0, 0, 8, 160); return cv;
     }
-    SPR = [
-      mk([[0, 'rgba(230,238,255,0)'], [0.4, 'rgba(236,242,255,.95)'], [1, 'rgba(143,180,255,0)']]),
-      mk([[0, 'rgba(70,120,255,0)'], [0.5, 'rgba(120,160,255,.85)'], [1, 'rgba(255,138,61,0)']])
-    ];
+    SPR = [mk(TH.spr[0]), mk(TH.spr[1])];
     return SPR;
   }
 
@@ -551,16 +569,16 @@
         var ly = bY - cam, lx = xAt(bY);
         c.globalCompositeOperation = 'lighter';
         var bandG = c.createLinearGradient(0, ly - 26, 0, ly + 26);
-        bandG.addColorStop(0, 'rgba(58,116,255,0)'); bandG.addColorStop(0.5, 'rgba(58,116,255,' + (0.22 * k) + ')'); bandG.addColorStop(1, 'rgba(58,116,255,0)');
+        bandG.addColorStop(0, 'rgba(' + TH.band + ',0)'); bandG.addColorStop(0.5, 'rgba(' + TH.band + ',' + (0.22 * k) + ')'); bandG.addColorStop(1, 'rgba(' + TH.band + ',0)');
         c.fillStyle = bandG; c.fillRect(-extra, ly - 26, W + extra * 2, 52);
-        c.fillStyle = 'rgba(200,218,255,' + (0.65 * k) + ')';
+        c.fillStyle = 'rgba(' + TH.bandLine + ',' + (0.65 * k) + ')';
         c.fillRect(-extra, ly - 0.75, W + extra * 2, 1.5);
         for (var pI = 0; pI < 3; pI++) {
           var ph = ((t * 0.55 + pI / 3) % 1);
           [-1, 1].forEach(function (dir) {
             var px = lx + dir * ph * (W * 0.75);
-            radial(c, px, ly, 26, [255, 138, 61], 0.55 * k * (1 - ph));
-            c.fillStyle = 'rgba(255,214,180,' + (k * (1 - ph)) + ')';
+            radial(c, px, ly, 26, TH.pulseGlow, 0.55 * k * (1 - ph));
+            c.fillStyle = 'rgba(' + TH.pulse + ',' + (k * (1 - ph)) + ')';
             c.fillRect(px - 9, ly - 1.5, 18, 3);
           });
         }
@@ -570,7 +588,7 @@
     if (y1 > y0) {
       // glow ribbon
       c.lineJoin = 'round'; c.lineCap = 'round';
-      var passes = [[g * 2.4, 'rgba(45,94,240,.08)'], [g * 1.1, 'rgba(58,116,255,.16)'], [g * 0.55, 'rgba(120,160,255,.22)'], [g * 0.16, 'rgba(236,242,255,.55)']];
+      var passes = [[g * 2.4, TH.passes[0]], [g * 1.1, TH.passes[1]], [g * 0.55, TH.passes[2]], [g * 0.16, TH.passes[3]]];
       for (var pI = 0; pI < passes.length; pI++) {
         c.beginPath();
         for (var y = y0; y <= y1; y += 14) {
@@ -594,7 +612,7 @@
         c.globalAlpha = s.a * edge * fadeIn;
         if (Math.abs(xb - xa) < 2) c.drawImage(spr[s.c], xa - s.w / 2, ya - cam, s.w, yb - ya);
         else {
-          c.strokeStyle = s.c ? 'rgba(120,160,255,.8)' : 'rgba(236,242,255,.9)'; c.lineWidth = s.w;
+          c.strokeStyle = s.c ? TH.streakB : TH.streakA; c.lineWidth = s.w;
           c.beginPath(); c.moveTo(xa, ya - cam); c.lineTo(xb, yb - cam); c.stroke();
         }
       }
@@ -606,15 +624,15 @@
         var py = base2 + ((((t * pk.v + pk.ph) % P2) + P2) % P2);
         if (py < S.spill.y + 40 || py > S.endY - 10) continue;
         var px = xAt(py) + pk.u * g, sy2 = py - cam;
-        radial(c, px, sy2, 16, [255, 138, 61], 0.35);
-        c.fillStyle = 'rgba(255,196,150,.95)';
+        radial(c, px, sy2, 16, TH.packetGlow, 0.35);
+        c.fillStyle = TH.packet;
         c.fillRect(px - 1.5, sy2 - pk.len / 2, 3, pk.len);
       }
       drawCodes(c, t, cam, g, y0, y1, extra);
     }
     // spill glow
     var sp = S.spill.y - cam;
-    if (sp > -200 && sp < H + 200) radial(c, S.spill.x, sp, g * 2.2, [143, 180, 255], 0.55 + 0.1 * Math.sin(t * 2));
+    if (sp > -200 && sp < H + 200) radial(c, S.spill.x, sp, g * 2.2, TH.spill, 0.55 + 0.1 * Math.sin(t * 2));
     // lake: splash, mist, rising lights
     var ly = S.lakeY - cam;
     if (ly > -300 && ly < H + 400) {
@@ -681,7 +699,7 @@
       }
       c.font = (o.line ? '500 ' : '600 ') + o.size + 'px ' + MONO;
       c.textAlign = o.side < 0 ? 'right' : 'left';
-      var col = o.hot ? '255,170,110' : (o.line ? '190,210,255' : '150,185,255');
+      var col = o.hot ? TH.codeHot : (o.line ? TH.codeLine : TH.codeTok);
       if (!lite) { c.shadowColor = 'rgba(' + col + ',.9)'; c.shadowBlur = o.line ? 10 : 8; }
       c.fillStyle = 'rgba(' + col + ',' + (a * (o.line ? 0.9 : 0.75)).toFixed(3) + ')';
       c.fillText(txt, x, sy);
@@ -724,5 +742,5 @@
     });
   }
 
-  window.TMWorld = { init: init, layout: layout, frame: frame, xAt: xAt, state: S };
+  window.TMWorld = { init: init, layout: layout, frame: frame, xAt: xAt, state: S, setTheme: setTheme, themes: Object.keys(THEMES) };
 })();
