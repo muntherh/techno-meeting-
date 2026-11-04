@@ -41,6 +41,11 @@ window.TECHNO_SETTINGS = {
     date: '',
   },
 
+  game: {                 // لعبة تكنو — TECHNO Air Code (مشهد «لعبة تكنو»)
+    // رمز QR في المشهد هو الرمز الرسمي للعبة ويشير إلى هذا الرابط؛ إن تغيّر الرابط فاستبدل assets/img/game-qr.png
+    url: 'https://game-1-lovat-zeta.vercel.app/',
+  },
+
   forms: {                // روابط نماذج الانضمام (Google Forms)
     events: '',
     relations: '',

@@ -37,6 +37,12 @@
       else { el.innerHTML = '<span class="ph">يُحدَّد لاحقًا</span>'; el.classList.add('is-ph'); }
     });
   }
+  function fillLinks() {
+    $$('[data-href]').forEach(function (el) {
+      var v = String(get(el.getAttribute('data-href')) || '').trim();
+      if (v) el.setAttribute('href', v); else el.removeAttribute('href');
+    });
+  }
   function buildQrs() {
     $$('[data-qr]').forEach(function (el) {
       var url = String(get(el.getAttribute('data-qr')) || '').trim();
@@ -525,6 +531,7 @@
   function start() {
     TMIcons.hydrate();
     fillSettings();
+    fillLinks();
     buildQrs();
     TMIcons.hydrate();
     decorate();

@@ -579,3 +579,43 @@ html.has-cloth.deck .spill { transform: translate(calc(var(--sw) * -0.18 - var(-
 html.has-cloth.flow .c-open { justify-content: flex-end; }
 html.has-cloth.flow .s-open { min-height: 100svh; }
 html.has-cloth.flow .c-open { min-height: 80svh; }
+
+/* ───────────────────────── game: TECHNO Air Code */
+.c-game { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); align-items: center; column-gap: calc(var(--u) * 4); }
+.game-text { display: flex; flex-direction: column; gap: calc(var(--u) * 1.2); }
+.game-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--u) * .5); }
+.game-list li { padding: .3em .9em; border-radius: 99px; background: rgba(10,15,34,.85); border: 1px solid rgba(143,180,255,.28); font: 600 calc(var(--u) * 1.05)/1.3 'Alexandria', sans-serif; color: var(--ice); }
+.game-list li:nth-child(1) { border-color: rgba(255,138,61,.55); color: #ffc49a; }
+.game-go { display: flex; align-items: center; gap: calc(var(--u) * 1.4); padding: calc(var(--u) * .9); border-radius: calc(var(--u) * 1.2);
+  background: linear-gradient(160deg, rgba(17,24,52,.92), rgba(4,6,16,.95)); border: 1px solid rgba(143,180,255,.25); align-self: flex-start; }
+.game-qr { width: calc(var(--u) * 11); height: auto; flex: none; }
+.game-go-t { display: flex; flex-direction: column; gap: calc(var(--u) * .5); align-items: flex-start; }
+.game-k { color: var(--dim); font-size: calc(var(--u) * 1.05); }
+.game-url { font: 500 calc(var(--u) * 1.05)/1.3 ui-monospace, Menlo, Consolas, monospace; color: var(--aqua); direction: ltr; }
+.game-btn { display: inline-flex; align-items: center; gap: .6em; margin-top: calc(var(--u) * .3); padding: .6em 1.3em; border-radius: 99px; text-decoration: none;
+  font: 700 calc(var(--u) * 1.2)/1 var(--display); color: #fff; background: linear-gradient(90deg, var(--mint), var(--sky));
+  box-shadow: 0 0 calc(var(--u) * 2) rgba(255,138,61,.3); transition: transform .3s var(--ease), box-shadow .3s; cursor: pointer; }
+.game-btn .ic { width: 1.1em; height: 1.1em; }
+.game-btn:hover { transform: translateY(-2px); box-shadow: 0 0 calc(var(--u) * 3) rgba(255,138,61,.5); }
+.game-screen { margin: 0; position: relative; border-radius: calc(var(--u) * 1); overflow: hidden; background: #03040a;
+  border: 1px solid rgba(143,180,255,.35); box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 5) rgba(0,1,8,.6), 0 0 calc(var(--u) * 4) rgba(58,116,255,.22); }
+.gs-bar { display: flex; align-items: center; gap: 6px; padding: calc(var(--u) * .55) calc(var(--u) * .9); background: rgba(58,116,255,.1); border-bottom: 1px solid rgba(143,180,255,.18); direction: ltr; }
+.gs-bar i { width: 9px; height: 9px; border-radius: 50%; background: rgba(186,196,224,.35); }
+.gs-bar i:first-child { background: var(--sky); }
+.gs-bar bdi { margin-left: calc(var(--u) * 1); font: 500 calc(var(--u) * .85)/1 ui-monospace, Menlo, Consolas, monospace; color: var(--dim); }
+.gs-view { position: relative; aspect-ratio: 16 / 9; }
+.gs-view img { width: 100%; height: 100%; object-fit: cover; }
+.gs-scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px); }
+.gs-scan::after { content: ''; position: absolute; left: 0; right: 0; height: 18%; top: -20%; background: linear-gradient(180deg, transparent, rgba(143,180,255,.12), transparent); animation: gsScan 4.5s linear infinite; }
+@keyframes gsScan { to { top: 110%; } }
+.game-screen figcaption { margin-left: auto; display: flex; align-items: center; gap: .6em; padding: .3em .8em; border-radius: 99px; background: rgba(3,4,10,.8); font: 600 calc(var(--u) * .9)/1 'Alexandria', sans-serif; color: var(--ice); direction: ltr; }
+.gs-live { display: inline-flex; align-items: center; gap: .35em; color: #ffb37a; }
+.gs-live b { width: 7px; height: 7px; border-radius: 50%; background: var(--sky); animation: blink 1.4s steps(1, end) infinite; }
+/* the screen switches on like a monitor: a bright line opens into the picture */
+[data-step].game-screen { opacity: 0; transform: none; clip-path: inset(49.5% 0 49.5% 0); filter: brightness(3); transition: none; }
+[data-step].game-screen.on { opacity: 1; clip-path: inset(0 0 0 0); filter: brightness(1);
+  transition: opacity .15s linear, clip-path .75s cubic-bezier(.7, 0, .2, 1) .12s, filter 1s var(--ease) .4s; }
+html.flow .c-game { display: flex; flex-direction: column; gap: 22px; }
+html.flow .game-go { flex-direction: column; align-items: center; align-self: stretch; }
+html.flow .game-qr { width: 200px; }
+html.lite .gs-scan::after, html.lite .gs-live b { animation: none !important; }
