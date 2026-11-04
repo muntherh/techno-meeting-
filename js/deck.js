@@ -124,24 +124,40 @@
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function sm(v) { v = clamp01(v); return v * v * (3 - 2 * v); }
   // the camera pulls back while it travels (you see the board layer between two scenes), then pushes in
-  function camScale(travel) { return 1 - 0.1 * travel; }
+  function camScale(travel) { return 1 - 0.07 * travel; }
   function contentOf(i) { return scenes[i] && scenes[i].querySelector('.content'); }
+  // Overlapping transition: while the world glides behind, both scenes' content stays (almost) pinned to the screen;
+  // the outgoing parts recede into depth one after another while the incoming parts come forward, interleaved.
+  // Uses the individual translate / scale properties and filter: opacity(), so the elements' own reveal transforms
+  // and opacity (steps, header lines) are left untouched and simply combine with it.
+  function parts(i) { var c = contentOf(i); return c ? Array.prototype.slice.call(c.children) : []; }
   function clearFade(tw) {
-    [tw.fromIdx, tw.target].forEach(function (i) { var c = contentOf(i); if (c) { c.style.opacity = ''; c.style.transform = ''; } });
+    [tw.fromIdx, tw.target].forEach(function (i) {
+      var c = contentOf(i); if (!c) return;
+      c.style.transform = '';
+      parts(i).forEach(function (el) { el.style.translate = ''; el.style.scale = ''; el.style.filter = ''; });
+    });
   }
   function fade(tw, p) {
-    var out = contentOf(tw.fromIdx), inn = contentOf(tw.target), dir = tw.to > tw.from ? 1 : -1;
-    if (out && tw.fromIdx !== tw.target) {
-      var k = sm(p / 0.42);
-      out.style.opacity = (1 - k).toFixed(3);
-      out.style.transform = 'translate3d(0,' + (-dir * k * st.H * 0.05).toFixed(1) + 'px,0) scale(' + (1 - 0.04 * k).toFixed(4) + ')';
-    }
-    if (inn) {
-      var q = sm((p - 0.5) / 0.42);
-      inn.style.opacity = q.toFixed(3);
-      inn.style.transform = 'translate3d(0,' + (dir * (1 - q) * st.H * 0.05).toFixed(1) + 'px,0) scale(' + (0.96 + 0.04 * q).toFixed(4) + ')';
-    }
+    var dir = tw.to > tw.from ? 1 : -1, H = st.H, same = tw.fromIdx === tw.target;
+    var out = contentOf(tw.fromIdx), inn = contentOf(tw.target);
+    // pin: cancel 88 % of the camera move, so content drifts only slightly in the direction of travel
+    if (out && !same) out.style.transform = 'translate3d(0,' + ((st.cam - st.tops[tw.fromIdx]) * 0.88).toFixed(1) + 'px,0)';
+    if (inn) inn.style.transform = 'translate3d(0,' + ((st.cam - st.tops[tw.target]) * 0.88).toFixed(1) + 'px,0)';
+    if (out && !same) parts(tw.fromIdx).forEach(function (el, j, all) {
+      var d = Math.min(j, 4) * 0.05, k = sm((p - 0.02 - d) / 0.5);
+      el.style.filter = k > 0.001 ? 'opacity(' + (1 - k).toFixed(3) + ')' : '';
+      el.style.scale = (1 - 0.1 * k).toFixed(4);
+      el.style.translate = '0 ' + (-dir * k * H * 0.04).toFixed(1) + 'px';
+    });
+    if (inn) parts(tw.target).forEach(function (el, j) {
+      var d = Math.min(j, 4) * 0.06, q = sm((p - 0.18 - d) / 0.45);
+      el.style.filter = q < 0.999 ? 'opacity(' + q.toFixed(3) + ')' : '';
+      el.style.scale = (1.08 - 0.08 * q).toFixed(4);
+      el.style.translate = '0 ' + (dir * (1 - q) * H * 0.05).toFixed(1) + 'px';
+    });
   }
+
   function applyCam(travel) {
     var sc = camScale(travel);
     var tf = 'translate3d(0,' + (-st.cam).toFixed(2) + 'px,0)' + (travel > 0.001 ? ' scale(' + sc.toFixed(4) + ')' : '');
@@ -491,7 +507,7 @@
       st.cam = tw.from + (tw.to - tw.from) * ease(p);
       travel = Math.sin(Math.PI * sm(p));
       fade(tw, p);
-      if (p > 0.6 && !tw.half) { tw.half = true; scenes[tw.target].classList.add('is-here'); }
+      if (p > 0.22 && !tw.half) { tw.half = true; scenes[tw.target].classList.add('is-here'); }
       if (p >= 1) { st.tween = null; st.cam = tw.to; travel = 0; clearFade(tw); tw.done && tw.done(); }
     }
     if (!st.deck) st.cam = scrollY;
