@@ -119,9 +119,31 @@
   }
 
   // ───────────────────────────── camera
-  function ease(t) { return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2; }
+  // smootherstep: zero velocity and acceleration at both ends, so the glide starts and lands softly
+  function ease(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function sm(v) { v = clamp01(v); return v * v * (3 - 2 * v); }
+  // the camera pulls back while it travels (you see the board layer between two scenes), then pushes in
+  function camScale(travel) { return 1 - 0.1 * travel; }
+  function contentOf(i) { return scenes[i] && scenes[i].querySelector('.content'); }
+  function clearFade(tw) {
+    [tw.fromIdx, tw.target].forEach(function (i) { var c = contentOf(i); if (c) { c.style.opacity = ''; c.style.transform = ''; } });
+  }
+  function fade(tw, p) {
+    var out = contentOf(tw.fromIdx), inn = contentOf(tw.target), dir = tw.to > tw.from ? 1 : -1;
+    if (out && tw.fromIdx !== tw.target) {
+      var k = sm(p / 0.42);
+      out.style.opacity = (1 - k).toFixed(3);
+      out.style.transform = 'translate3d(0,' + (-dir * k * st.H * 0.05).toFixed(1) + 'px,0) scale(' + (1 - 0.04 * k).toFixed(4) + ')';
+    }
+    if (inn) {
+      var q = sm((p - 0.5) / 0.42);
+      inn.style.opacity = q.toFixed(3);
+      inn.style.transform = 'translate3d(0,' + (dir * (1 - q) * st.H * 0.05).toFixed(1) + 'px,0) scale(' + (0.96 + 0.04 * q).toFixed(4) + ')';
+    }
+  }
   function applyCam(travel) {
-    var sc = 1 - 0.035 * travel;
+    var sc = camScale(travel);
     var tf = 'translate3d(0,' + (-st.cam).toFixed(2) + 'px,0)' + (travel > 0.001 ? ' scale(' + sc.toFixed(4) + ')' : '');
     var org = (st.W / 2) + 'px ' + (st.cam + st.H / 2).toFixed(1) + 'px';
     world.style.transform = tf; world.style.transformOrigin = org;
@@ -133,8 +155,10 @@
   function travelTo(i, onArrive) {
     var from = st.cam, to = st.tops[i];
     var dist = Math.abs(i - st.idx) || 1;
-    var dur = reduced ? 0 : Math.min(2600, 1500 + 420 * Math.log(dist + 0.0001) / Math.LN2 * (dist > 1 ? 1 : 0));
-    st.tween = { from: from, to: to, t0: performance.now(), dur: dur, target: i, done: onArrive, half: false };
+    var dur = reduced ? 0 : Math.min(2800, 1750 + 420 * Math.log(dist + 0.0001) / Math.LN2 * (dist > 1 ? 1 : 0));
+    var fromIdx = st.tween ? st.tween.target : nearestIdx(from);
+    if (st.tween) clearFade(st.tween);
+    st.tween = { from: from, to: to, t0: performance.now(), dur: dur, target: i, fromIdx: fromIdx, done: onArrive, half: false };
     if (!dur) { st.cam = to; st.tween = null; onArrive && onArrive(); }
   }
 
@@ -190,8 +214,12 @@
     if (st.step > 0) { st.step--; setSteps(st.idx, st.step); syncUi(); }
     else if (st.idx > 0) go(st.idx - 1, maxStep[st.idx - 1]);
   }
+  function nearestIdx(y) {
+    var best = 0; for (var k = 1; k < N; k++) if (Math.abs(st.tops[k] - y) < Math.abs(st.tops[best] - y)) best = k; return best;
+  }
   function finishTween() {
     var tw = st.tween; if (!tw) return;
+    clearFade(tw);
     st.tween = null; st.cam = tw.to; applyCam(0);
     if (!tw.half) { tw.half = true; }
     tw.done && tw.done();
@@ -459,9 +487,10 @@
     if (st.deck && st.tween) {
       var tw = st.tween, p = Math.min(1, (now - tw.t0) / tw.dur);
       st.cam = tw.from + (tw.to - tw.from) * ease(p);
-      travel = Math.sin(Math.PI * p);
-      if (p > 0.62 && !tw.half) { tw.half = true; scenes[tw.target].classList.add('is-here'); }
-      if (p >= 1) { st.tween = null; st.cam = tw.to; travel = 0; tw.done && tw.done(); }
+      travel = Math.sin(Math.PI * sm(p));
+      fade(tw, p);
+      if (p > 0.6 && !tw.half) { tw.half = true; scenes[tw.target].classList.add('is-here'); }
+      if (p >= 1) { st.tween = null; st.cam = tw.to; travel = 0; clearFade(tw); tw.done && tw.done(); }
     }
     if (!st.deck) st.cam = scrollY;
     if (st.cam !== st.lastCam || travel !== st.lastTravel) {
@@ -469,7 +498,7 @@
       else { world.style.transform = 'translate3d(0,' + (-st.cam) + 'px,0)'; back.style.transform = world.style.transform; }
       st.lastCam = st.cam; st.lastTravel = travel;
     }
-    TMWorld.frame(now, st.cam, travel);
+    TMWorld.frame(now, st.cam, travel, st.deck ? camScale(travel) : 1);
     perf(now);
     requestAnimationFrame(loop);
   }

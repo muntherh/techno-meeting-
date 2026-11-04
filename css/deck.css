@@ -59,7 +59,7 @@ button { font: inherit; color: inherit; }
 .far-svg, .near-svg { position: absolute; left: 0; display: block; }
 .scene-art { position: absolute; left: 0; width: 100%; }
 .scene-art > .art, .art { position: absolute; inset: 0; }
-.scene-art .gen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.scene-art .gen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; }
 .seam { position: absolute; left: 0; width: 100%; }
 .seam svg { display: block; width: 100%; height: 100%; overflow: visible; }
 html:not(.ready) #world { opacity: 0; }

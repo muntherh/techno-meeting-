@@ -300,13 +300,13 @@
       html += '<rect x="0" y="' + f1(h * 0.4) + '" width="' + W + '" height="' + f1(hz - h * 0.4) + '" fill="url(#hz)"/>';
       var gl = '';
       for (var gx = -12; gx <= 12; gx++) gl += 'M' + f1(W / 2 + gx * W * 0.04) + ' ' + f1(hz) + 'L' + f1(W / 2 + gx * W * 0.22) + ' ' + f1(h);
-      for (var gy = 0; gy < 9; gy++) { var yy = hz + (h - hz) * Math.pow(gy / 8, 1.8); gl += 'M0 ' + f1(yy) + 'H' + W; }
+      for (var gy = 0; gy < 9; gy++) { var yy = hz + (h - hz) * Math.pow(gy / 8, 1.8); gl += 'M' + f1(-W * 0.15) + ' ' + f1(yy) + 'H' + f1(W * 1.15); }
       html += '<path d="' + gl + '" stroke="' + C.mint + '" stroke-opacity=".22" stroke-width="1" fill="none"/>';
-      html += '<path d="M0 ' + f1(hz) + 'H' + W + '" stroke="' + C.aqua + '" stroke-opacity=".6" stroke-width="1.5"/>';
+      html += '<path d="M' + f1(-W * 0.15) + ' ' + f1(hz) + 'H' + f1(W * 1.15) + '" stroke="' + C.aqua + '" stroke-opacity=".6" stroke-width="1.5"/>';
       var cols = ['#0d1434', '#0a0f28', '#070a1c'];
       for (var L = 0; L < 3; L++) {
-        var xx = -10, tw2, th2, win = '';
-        while (xx < W + 10) {
+        var xx = -W * 0.15, tw2, th2, win = '';
+        while (xx < W * 1.15) {
           tw2 = W * (0.018 + r() * 0.03); th2 = h * (0.06 + r() * (0.22 - L * 0.05));
           if (Math.abs(xx - x) > W * 0.05) {
             html += '<rect x="' + f1(xx) + '" y="' + f1(hz - th2) + '" width="' + f1(tw2) + '" height="' + f1(th2) + '" fill="' + cols[L] + '" stroke="' + C.mint + '" stroke-opacity="' + (0.35 - L * 0.1).toFixed(2) + '"/>';
@@ -393,9 +393,12 @@
       var deco = kind === 'surface' ? 'antennas' : zone === 'garden' ? 'plants' : 'crystals';
       var wrap = document.createElement('div');
       wrap.className = 'seam seam-' + kind;
+      var pad = W * 0.12;
       wrap.style.top = (b - B / 2) + 'px';
       wrap.style.height = B + 'px';
-      wrap.appendChild(seamSVG(i, W, B, xAt(b - B / 2), xAt(b + B / 2), kind, deco, 4242 + i * 97));
+      wrap.style.left = (-pad) + 'px';
+      wrap.style.width = (W + pad * 2) + 'px';
+      wrap.appendChild(seamSVG(i, W + pad * 2, B, xAt(b - B / 2) + pad, xAt(b + B / 2) + pad, kind, deco, 4242 + i * 97));
       S.back.appendChild(wrap);
     }
     buildFar();
@@ -443,13 +446,13 @@
   }
 
   // ───────────────────────────────── frame
-  function frame(now, cam, travel) {
+  function frame(now, cam, travel, scale) {
     var t = S.reduced ? 0 : now / 1000;
+    var sc = scale || 1;
     drawBg(t, cam, travel);
-    drawFx(t, cam, travel);
+    drawFx(t, cam, travel, sc);
     // parallax layers
-    var sc = 1 - 0.03 * travel;
-    S.far.style.transform = 'translate3d(0,' + (-cam * FAR_F).toFixed(2) + 'px,0) scale(' + (1 - 0.012 * travel).toFixed(4) + ')';
+    S.far.style.transform = 'translate3d(0,' + (-cam * FAR_F).toFixed(2) + 'px,0) scale(' + (1 - 0.05 * travel).toFixed(4) + ')';
     S.far.style.transformOrigin = '50% ' + (cam * FAR_F + S.H / 2).toFixed(1) + 'px';
     S.near.style.transform = 'translate3d(0,' + (-cam * NEAR_F).toFixed(2) + 'px,0) scale(' + (1 + 0.04 * travel).toFixed(4) + ')';
     S.near.style.transformOrigin = '50% ' + (cam * NEAR_F + S.H / 2).toFixed(1) + 'px';
@@ -528,12 +531,38 @@
     return SPR;
   }
 
-  function drawFx(t, cam, travel) {
+  function drawFx(t, cam, travel, sc) {
     var c = S.fxc, W = S.W, H = S.H, d = S.dprFx;
     c.setTransform(d, 0, 0, d, 0, 0);
     c.clearRect(0, 0, W, H);
+    // same pull-back as the world layers: scale around the centre of the screen
+    c.setTransform(d * sc, 0, 0, d * sc, d * (W / 2) * (1 - sc), d * (H / 2) * (1 - sc));
+    var extra = (H / 2) * (1 / sc - 1);
     var g = Math.max(46, W * 0.034);
-    var y0 = Math.max(S.spill.y, cam - 60), y1 = Math.min(S.endY, cam + H + 60);
+    var y0 = Math.max(S.spill.y, cam - 60 - extra), y1 = Math.min(S.endY, cam + H + 60 + extra);
+    // crossing a board layer: an electrical pulse runs out along it from the data stream
+    if (travel > 0.02) {
+      for (var bi = 1; bi < S.tops.length; bi++) {
+        var bY = S.tops[bi], k = travel * Math.max(0, 1 - Math.abs(bY - (cam + H / 2)) / (H * 0.5));
+        if (k < 0.02) continue;
+        var ly = bY - cam, lx = xAt(bY);
+        c.globalCompositeOperation = 'lighter';
+        var bandG = c.createLinearGradient(0, ly - 26, 0, ly + 26);
+        bandG.addColorStop(0, 'rgba(58,116,255,0)'); bandG.addColorStop(0.5, 'rgba(58,116,255,' + (0.22 * k) + ')'); bandG.addColorStop(1, 'rgba(58,116,255,0)');
+        c.fillStyle = bandG; c.fillRect(-extra, ly - 26, W + extra * 2, 52);
+        c.fillStyle = 'rgba(200,218,255,' + (0.65 * k) + ')';
+        c.fillRect(-extra, ly - 0.75, W + extra * 2, 1.5);
+        for (var pI = 0; pI < 3; pI++) {
+          var ph = ((t * 0.55 + pI / 3) % 1);
+          [-1, 1].forEach(function (dir) {
+            var px = lx + dir * ph * (W * 0.75);
+            radial(c, px, ly, 26, [255, 138, 61], 0.55 * k * (1 - ph));
+            c.fillStyle = 'rgba(255,214,180,' + (k * (1 - ph)) + ')';
+            c.fillRect(px - 9, ly - 1.5, 18, 3);
+          });
+        }
+      }
+    }
     c.globalCompositeOperation = 'lighter';
     if (y1 > y0) {
       // glow ribbon
@@ -553,7 +582,7 @@
       for (var i = 0; i < S.streaks.length; i += (S.lite ? 2 : 1)) {
         var s = S.streaks[i];
         var yy = base + ((((t * s.v + s.ph) % P) + P) % P);
-        var ye = yy + s.len;
+        var ye = yy + s.len * (1 + 1.8 * travel);
         if (ye < S.spill.y || yy > S.endY) continue;
         var ya = Math.max(yy, S.spill.y), yb = Math.min(ye, S.endY);
         var xa = xAt(ya) + s.u * g, xb = xAt(yb) + s.u * g;
