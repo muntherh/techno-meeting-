@@ -13,8 +13,8 @@
 
   var NS = 'http://www.w3.org/2000/svg';
   var C = {
-    mint: '#1fd4a0', teal: '#03aea9', blue: '#007db9', royal: '#0144bb', sky: '#2a6fe0',
-    ice: '#bffcf1', aqua: '#5ff0d2'
+    mint: '#3a74ff', teal: '#2d5ef0', blue: '#2f6bff', royal: '#1d3fae', sky: '#ff8a3d',
+    ice: '#e6eeff', aqua: '#8fb4ff'
   };
   var FAR_F = 0.55, NEAR_F = 1.32;
 
@@ -58,15 +58,15 @@
 
   // Depth palette keyed by scene position p (0 = first scene).
   var DEPTH = [
-    [0, '#081a4a', '#0c3b6c'],
-    [1, '#0a2a5c', '#0f5a78'],
-    [2, '#050d29', '#071a3e'],
-    [5, '#050c26', '#08183c'],
-    [6, '#04122a', '#06283a'],
-    [10, '#05132b', '#062636'],
-    [11, '#060b29', '#0a1a50'],
-    [15, '#050a26', '#0a184a'],
-    [16, '#03112a', '#063244']
+    [0, '#05081a', '#0b1236'],
+    [1, '#060a1f', '#101a44'],
+    [2, '#03040b', '#070a1a'],
+    [5, '#03040b', '#080b1e'],
+    [6, '#040510', '#0b0d24'],
+    [10, '#040510', '#0b0d22'],
+    [11, '#030409', '#0a0f2a'],
+    [14, '#030409', '#0a0e26'],
+    [15, '#04060f', '#0d1434']
   ].map(function (d) { return [d[0], hex(d[1]), hex(d[2])]; });
 
   function depthColors(p) {
@@ -94,147 +94,131 @@
   function seamSVG(idx, W, B, xa, xb, kind, deco, seed) {
     var r = rngOf(seed), m = B / 2, svg = svgEl(W, B, 'seam-svg seam-' + kind), id = 'sm' + idx;
     var g = Math.max(46, W * 0.034); // stream width
-    var defs = '<defs>' +
-      '<linearGradient id="' + id + 'rim" x1="0" x2="1"><stop offset="0" stop-color="' + C.mint + '"/><stop offset=".35" stop-color="' + C.teal + '"/><stop offset=".7" stop-color="' + C.sky + '"/><stop offset="1" stop-color="' + C.mint + '"/></linearGradient>' +
-      '<linearGradient id="' + id + 'top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10285c"/><stop offset="1" stop-color="#0a1a44"/></linearGradient>' +
-      '<linearGradient id="' + id + 'cry" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.ice + '" stop-opacity=".95"/><stop offset=".45" stop-color="' + C.aqua + '" stop-opacity=".7"/><stop offset="1" stop-color="' + C.teal + '" stop-opacity=".1"/></linearGradient>' +
-      '<linearGradient id="' + id + 'ice" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9fd0ff" stop-opacity=".9"/><stop offset=".5" stop-color="' + C.sky + '" stop-opacity=".6"/><stop offset="1" stop-color="' + C.royal + '" stop-opacity=".05"/></linearGradient>' +
-      '<linearGradient id="' + id + 'leaf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9dffe2"/><stop offset=".5" stop-color="' + C.mint + '" stop-opacity=".75"/><stop offset="1" stop-color="' + C.teal + '" stop-opacity=".15"/></linearGradient>' +
-      '<radialGradient id="' + id + 'glow"><stop offset="0" stop-color="' + C.aqua + '" stop-opacity=".55"/><stop offset="1" stop-color="' + C.aqua + '" stop-opacity="0"/></radialGradient>' +
-      '<linearGradient id="' + id + 'cloud" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9fffb" stop-opacity=".5"/><stop offset=".5" stop-color="#9ef3e3" stop-opacity=".16"/><stop offset="1" stop-color="#5aa8ff" stop-opacity="0"/></linearGradient>' +
+    var html = '<defs>' +
+      '<linearGradient id="' + id + 'rim" x1="0" x2="1"><stop offset="0" stop-color="' + C.mint + '" stop-opacity=".5"/><stop offset=".45" stop-color="' + C.aqua + '"/><stop offset=".7" stop-color="' + C.sky + '" stop-opacity=".8"/><stop offset="1" stop-color="' + C.mint + '" stop-opacity=".5"/></linearGradient>' +
+      '<linearGradient id="' + id + 'top" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141c3e"/><stop offset="1" stop-color="#0a0f26"/></linearGradient>' +
+      '<linearGradient id="' + id + 'scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.aqua + '" stop-opacity=".35"/><stop offset="1" stop-color="' + C.mint + '" stop-opacity=".04"/></linearGradient>' +
+      '<radialGradient id="' + id + 'glow"><stop offset="0" stop-color="' + C.mint + '" stop-opacity=".5"/><stop offset="1" stop-color="' + C.mint + '" stop-opacity="0"/></radialGradient>' +
+      '<linearGradient id="' + id + 'grid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.aqua + '" stop-opacity="0"/><stop offset=".5" stop-color="' + C.aqua + '" stop-opacity=".22"/><stop offset="1" stop-color="' + C.aqua + '" stop-opacity="0"/></linearGradient>' +
       '</defs>';
-    var html = defs;
 
-    if (kind === 'cloud') {
-      for (var L = 0; L < 5; L++) {
-        var off = m + (L - 2) * B * 0.085, top = [], bottom = [];
-        var x = -W * 0.12;
-        while (x < W * 1.12) {
-          top.push([x, off - B * (0.03 + r() * 0.09)]);
-          x += W * (0.025 + r() * 0.05);
-        }
-        for (var k = top.length - 1; k >= 0; k--) bottom.push([top[k][0] + (r() - 0.5) * 30, off + B * (0.05 + r() * 0.05)]);
-        var poly = top.concat(bottom);
-        html += '<g class="cloud c' + L + '"><polygon points="' + pts(poly) + '" fill="url(#' + id + 'cloud)" opacity="' + (0.35 + L * 0.13).toFixed(2) + '"/>' +
-          '<polyline points="' + pts(top) + '" fill="none" stroke="#f1fffc" stroke-opacity="' + (0.12 + L * 0.05).toFixed(2) + '" stroke-width="1.2"/></g>';
+    if (kind === 'cloud') { // a stack of translucent holographic data planes
+      for (var L = 0; L < 4; L++) {
+        var y0 = m + (L - 1.5) * B * 0.1, hh = B * (0.035 + r() * 0.03);
+        html += '<g class="cloud c' + L + '"><rect x="' + f1(-W * 0.1) + '" y="' + f1(y0) + '" width="' + f1(W * 1.2) + '" height="' + f1(hh) + '" fill="url(#' + id + 'grid)" opacity="' + (0.5 + L * 0.12).toFixed(2) + '"/>';
+        var ln = '';
+        for (var gx = -W * 0.1; gx < W * 1.1; gx += 46) ln += 'M' + f1(gx) + ' ' + f1(y0) + 'v' + f1(hh);
+        html += '<path d="' + ln + '" stroke="' + C.aqua + '" stroke-opacity=".12" stroke-width="1"/>';
+        html += '<path d="M' + f1(-W * 0.1) + ' ' + f1(y0) + 'H' + f1(W * 1.1) + '" stroke="' + C.ice + '" stroke-opacity="' + (0.1 + L * 0.06).toFixed(2) + '" stroke-width="1" stroke-dasharray="' + (6 + L * 4) + ' ' + (10 + L * 6) + '"/></g>';
       }
       svg.innerHTML = html;
       return svg;
     }
 
-    // Rock mass: jagged ground surface (top) and cave ceiling with stalactites (bottom).
-    var surf = [], ceil = [], s1 = [], s2 = [], s3 = [];
-    var step = W / (22 + r() * 8), xx = -20;
-    var amp = kind === 'surface' ? 0.07 : 0.12;
-    while (xx <= W + 20) {
-      var sy = m - B * (0.12 + r() * amp);
-      if (kind !== 'surface' && r() < 0.11) { surf.push([xx - step * 0.25, sy]); surf.push([xx, m - B * (0.3 + r() * 0.1)]); surf.push([xx + step * 0.25, sy]); }
-      else surf.push([xx, sy]);
-      var cy = m + B * (0.1 + r() * 0.08);
-      if (r() < 0.32) { ceil.push([xx - step * 0.2, cy]); ceil.push([xx, m + B * (0.27 + r() * 0.17)]); ceil.push([xx + step * 0.2, cy]); }
-      else ceil.push([xx, cy]);
-      s1.push([xx, m - B * (0.06 + r() * 0.04)]);
-      s2.push([xx, m + B * (0.0 + r() * 0.04)]);
-      s3.push([xx, m + B * (0.06 + r() * 0.03)]);
-      xx += step * (0.7 + r() * 0.6);
+    // Chamfered board profile: flat runs joined by 45° steps (circuit-board / architectural edges).
+    function profile(base, amp, up) {
+      var p = [], x = -30, lvl = base - (up ? 1 : -1) * amp * r();
+      p.push([x, lvl]);
+      while (x < W + 30) {
+        var run = W * (0.04 + r() * 0.09);
+        x += run; p.push([x, lvl]);
+        var nl = base - (up ? 1 : -1) * amp * r(), d = Math.abs(nl - lvl);
+        x += d; p.push([x, nl]); lvl = nl;
+      }
+      return p;
     }
+    var surf = profile(m - B * 0.12, B * (kind === 'surface' ? 0.06 : 0.12), true);
+    var ceil = profile(m + B * 0.12, B * 0.08, false);
     function band(a, b) { return a.concat(b.slice().reverse()); }
     var mass = band(surf, ceil);
     html += '<clipPath id="' + id + 'clip"><polygon points="' + pts(mass) + '"/></clipPath>';
-    html += '<polygon points="' + pts(mass) + '" fill="#050b24"/>';
-    html += '<polygon points="' + pts(band(surf, s1)) + '" fill="url(#' + id + 'top)"/>';
-    html += '<polygon points="' + pts(band(s1, s2)) + '" fill="#08163b" clip-path="url(#' + id + 'clip)"/>';
-    html += '<polygon points="' + pts(band(s3, ceil)) + '" fill="#0a1a46" clip-path="url(#' + id + 'clip)"/>';
-    // shard facets on the top layer
-    var facets = '';
-    for (var fI = 1; fI < surf.length - 1; fI++) {
-      if (r() < 0.55) {
-        var a1 = surf[fI], b1 = surf[fI + 1], cpt = [lerp(a1[0], b1[0], 0.5 + (r() - 0.5) * 0.4), m - B * (0.04 + r() * 0.03)];
-        facets += '<polygon points="' + pts([a1, b1, cpt]) + '" fill="' + (r() < 0.5 ? '#1b3f7a' : '#0f2a5c') + '" opacity="' + (0.35 + r() * 0.35).toFixed(2) + '"/>';
-      }
-    }
-    html += '<g clip-path="url(#' + id + 'clip)">' + facets + '</g>';
+    html += '<polygon points="' + pts(mass) + '" fill="#05070f"/>';
+    html += '<polygon points="' + pts(band(surf, [[-30, m - B * 0.05], [W + 30, m - B * 0.05]])) + '" fill="url(#' + id + 'top)" clip-path="url(#' + id + 'clip)"/>';
+    html += '<rect x="0" y="' + f1(m + B * 0.05) + '" width="' + W + '" height="' + f1(B * 0.2) + '" fill="#0a0e22" clip-path="url(#' + id + 'clip)"/>';
+    // layer lines (board laminations)
+    html += '<g clip-path="url(#' + id + 'clip)" stroke="' + C.mint + '" stroke-opacity=".22" stroke-width="1"><path d="M0 ' + f1(m - B * 0.05) + 'H' + W + 'M0 ' + f1(m + B * 0.05) + 'H' + W + '"/></g>';
 
-    // the channel the waterfall pours through
+    // the channel the data stream runs through
     var chL = [], chR = [];
     for (var cyy = 0; cyy <= B; cyy += B / 16) {
       var cx = lerp(xa, xb, smooth(cyy / B));
       chL.push([cx - g * 0.75, cyy]); chR.push([cx + g * 0.75, cyy]);
     }
-    html += '<g clip-path="url(#' + id + 'clip)"><polygon points="' + pts(chL.concat(chR.slice().reverse())) + '" fill="#020617"/>' +
-      '<polyline points="' + pts(chL) + '" fill="none" stroke="' + C.aqua + '" stroke-opacity=".55" stroke-width="1.6"/>' +
-      '<polyline points="' + pts(chR) + '" fill="none" stroke="' + C.aqua + '" stroke-opacity=".55" stroke-width="1.6"/></g>';
+    html += '<g clip-path="url(#' + id + 'clip)"><polygon points="' + pts(chL.concat(chR.slice().reverse())) + '" fill="#010204"/>' +
+      '<polyline points="' + pts(chL) + '" fill="none" stroke="' + C.aqua + '" stroke-opacity=".5" stroke-width="1.4"/>' +
+      '<polyline points="' + pts(chR) + '" fill="none" stroke="' + C.aqua + '" stroke-opacity=".5" stroke-width="1.4"/></g>';
     function nearChannel(x, y) { var cx2 = lerp(xa, xb, smooth(y / B)); return Math.abs(x - cx2) < g * 1.6; }
 
-    // circuit traces inside the strata
+    // circuit traces with vias; a few carry an orange signal node
     var tr = '', nodes = '';
-    var nT = Math.round(W / 230);
+    var nT = Math.round(W / 170);
     for (var t = 0; t < nT; t++) {
-      var x0 = r() * W, y0 = m + (r() - 0.45) * B * 0.11, dir = r() < 0.5 ? -1 : 1;
-      var l1 = 50 + r() * 170, d = (14 + r() * 16) * (r() < 0.5 ? -1 : 1), l2 = 40 + r() * 130;
-      var p1 = [x0 + dir * l1, y0], p2 = [p1[0] + dir * Math.abs(d), y0 + d * 0.6], p3 = [p2[0] + dir * l2, p2[1]];
+      var x0 = r() * W, y0 = m + (r() - 0.5) * B * 0.08, dir = r() < 0.5 ? -1 : 1;
+      var l1 = 40 + r() * 160, d = (10 + r() * 14) * (r() < 0.5 ? -1 : 1), l2 = 30 + r() * 120;
+      var p1 = [x0 + dir * l1, y0], p2 = [p1[0] + dir * Math.abs(d), y0 + d], p3 = [p2[0] + dir * l2, p2[1]];
       if (nearChannel(x0, y0) || nearChannel(p1[0], y0) || nearChannel(p3[0], p3[1]) || nearChannel(p2[0], p2[1])) continue;
       tr += '<polyline points="' + pts([[x0, y0], p1, p2, p3]) + '"/>';
-      nodes += '<circle class="node" cx="' + f1(p3[0]) + '" cy="' + f1(p3[1]) + '" r="3.2" style="animation-delay:' + (r() * 3).toFixed(2) + 's"/>' +
-        '<circle cx="' + f1(x0) + '" cy="' + f1(y0) + '" r="2" fill="#0b2a5c" stroke="' + C.teal + '" stroke-width="1"/>';
+      var hot = r() < 0.3;
+      nodes += '<circle class="' + (hot ? 'node' : '') + '" cx="' + f1(p3[0]) + '" cy="' + f1(p3[1]) + '" r="' + (hot ? 3 : 2.4) + '" fill="' + (hot ? C.sky : C.aqua) + '" style="animation-delay:' + (r() * 3).toFixed(2) + 's"/>' +
+        '<circle cx="' + f1(x0) + '" cy="' + f1(y0) + '" r="2.2" fill="#05070f" stroke="' + C.mint + '" stroke-width="1"/>';
     }
-    html += '<g clip-path="url(#' + id + 'clip)"><g fill="none" stroke="' + C.teal + '" stroke-opacity=".45" stroke-width="1.3">' + tr + '</g><g fill="' + C.aqua + '">' + nodes + '</g></g>';
+    html += '<g clip-path="url(#' + id + 'clip)"><g fill="none" stroke="' + C.mint + '" stroke-opacity=".5" stroke-width="1.2">' + tr + '</g>' + nodes + '</g>';
 
-    // rim light on the surface and the ceiling
-    html += '<polyline points="' + pts(surf) + '" fill="none" stroke="url(#' + id + 'rim)" stroke-width="7" stroke-opacity=".16" stroke-linejoin="round"/>';
-    html += '<polyline points="' + pts(surf) + '" fill="none" stroke="url(#' + id + 'rim)" stroke-width="2" stroke-linejoin="round"/>';
-    html += '<polyline points="' + pts(ceil) + '" fill="none" stroke="' + C.sky + '" stroke-opacity=".5" stroke-width="1.5" stroke-linejoin="round"/>';
+    // luminous edges
+    html += '<polyline points="' + pts(surf) + '" fill="none" stroke="url(#' + id + 'rim)" stroke-width="6" stroke-opacity=".14" stroke-linejoin="miter"/>';
+    html += '<polyline points="' + pts(surf) + '" fill="none" stroke="url(#' + id + 'rim)" stroke-width="1.6" stroke-linejoin="miter"/>';
+    html += '<polyline points="' + pts(ceil) + '" fill="none" stroke="' + C.mint + '" stroke-opacity=".45" stroke-width="1.2" stroke-linejoin="miter"/>';
 
-    function surfY(x) {
-      for (var q = 0; q < surf.length - 1; q++) if (x >= surf[q][0] && x <= surf[q + 1][0]) return lerp(surf[q][1], surf[q + 1][1], (x - surf[q][0]) / (surf[q + 1][0] - surf[q][0]));
-      return m - B * 0.15;
-    }
-    function ceilY(x) {
-      for (var q = 0; q < s3.length - 1; q++) if (x >= s3[q][0] && x <= s3[q + 1][0]) return m + B * 0.12;
-      return m + B * 0.12;
+    function yOn(line, x) {
+      for (var q = 0; q < line.length - 1; q++) if (x >= line[q][0] && x <= line[q + 1][0]) return lerp(line[q][1], line[q + 1][1], (x - line[q][0]) / ((line[q + 1][0] - line[q][0]) || 1));
+      return line[0][1];
     }
 
-    // decoration on the ground surface: crystals (caves), luminous plants (community), antennas (surface)
+    // structures standing on the board: chips, server racks, data towers, holographic panels
     var dec = '';
-    var nD = Math.round(W / (deco === 'plants' ? 120 : 300));
+    var nD = Math.round(W / (kind === 'surface' ? 70 : 260));
     for (var dI = 0; dI < nD; dI++) {
-      var dx = (dI + 0.2 + r() * 0.6) * (W / nD), dy = surfY(dx) + 3;
+      var dx = (dI + 0.15 + r() * 0.7) * (W / nD), dy = yOn(surf, dx) + 1;
       if (nearChannel(dx, dy)) continue;
-      if (deco === 'plants') {
-        var blades = 3 + Math.floor(r() * 4), hMax = B * (0.07 + r() * 0.1);
-        dec += '<ellipse cx="' + f1(dx) + '" cy="' + f1(dy) + '" rx="' + f1(hMax * 0.9) + '" ry="' + f1(hMax * 0.35) + '" fill="url(#' + id + 'glow)" opacity=".7"/>';
-        for (var bI = 0; bI < blades; bI++) {
-          var ang = (r() - 0.5) * 1.1, hh = hMax * (0.45 + r() * 0.55), ww = 3 + r() * 6;
-          var tip = [dx + Math.sin(ang) * hh, dy - Math.cos(ang) * hh];
-          dec += '<polygon class="leaf" style="animation-delay:' + (r() * 4).toFixed(2) + 's;transform-origin:' + f1(dx) + 'px ' + f1(dy) + 'px" points="' + pts([[dx - ww, dy], [lerp(dx, tip[0], 0.6) - ww * 0.6, lerp(dy, tip[1], 0.6)], tip, [lerp(dx, tip[0], 0.6) + ww * 0.6, lerp(dy, tip[1], 0.6)], [dx + ww, dy]]) + '" fill="url(#' + id + 'leaf)"/>';
-          if (r() < 0.5) dec += '<circle class="node" cx="' + f1(tip[0]) + '" cy="' + f1(tip[1]) + '" r="2.4" fill="#d9fff4" style="animation-delay:' + (r() * 3).toFixed(2) + 's"/>';
-        }
-      } else if (deco === 'antennas') {
-        if (r() < 0.6) continue;
-        var ah = B * (0.08 + r() * 0.12);
-        dec += '<path d="M' + f1(dx) + ' ' + f1(dy) + 'V' + f1(dy - ah) + 'M' + f1(dx - 6) + ' ' + f1(dy) + 'L' + f1(dx) + ' ' + f1(dy - ah * 0.6) + 'L' + f1(dx + 6) + ' ' + f1(dy) + '" stroke="#163a72" stroke-width="2" fill="none"/>' +
-          '<circle class="blink" cx="' + f1(dx) + '" cy="' + f1(dy - ah) + '" r="2.6" fill="' + C.aqua + '" style="animation-delay:' + (r() * 2).toFixed(2) + 's"/>';
-      } else {
-        var n = 2 + Math.floor(r() * 3), base = 8 + r() * 10;
-        dec += '<ellipse cx="' + f1(dx) + '" cy="' + f1(dy) + '" rx="' + f1(base * 4) + '" ry="' + f1(base * 1.3) + '" fill="url(#' + id + 'glow)"/>';
-        for (var cI = 0; cI < n; cI++) {
-          var ca = (r() - 0.5) * 0.9, ch = B * (0.06 + r() * 0.12), cw = base * (0.4 + r() * 0.5), ox = (cI - n / 2) * cw * 1.1;
-          var bx = dx + ox, tipx = bx + Math.sin(ca) * ch, tipy = dy - Math.cos(ca) * ch;
-          dec += '<polygon points="' + pts([[bx - cw, dy + 2], [lerp(bx, tipx, 0.72) - cw * 0.8, lerp(dy, tipy, 0.72)], [tipx, tipy], [lerp(bx, tipx, 0.72) + cw * 0.8, lerp(dy, tipy, 0.72)], [bx + cw, dy + 2]]) + '" fill="url(#' + id + 'cry)" stroke="' + C.ice + '" stroke-opacity=".45" stroke-width=".8"/>';
-        }
+      var pick = r();
+      if (kind === 'surface') { // skyline: towers with lit windows
+        var tw = 14 + r() * 26, th = B * (0.06 + r() * 0.2), win = '';
+        for (var wy = dy - th + 6; wy < dy - 4; wy += 7) for (var wx = dx - tw / 2 + 4; wx < dx + tw / 2 - 3; wx += 6) if (r() < 0.32) win += '<rect x="' + f1(wx) + '" y="' + f1(wy) + '" width="2" height="2"/>';
+        dec += '<rect x="' + f1(dx - tw / 2) + '" y="' + f1(dy - th) + '" width="' + f1(tw) + '" height="' + f1(th) + '" fill="#0a0f24" stroke="' + C.mint + '" stroke-opacity=".35" stroke-width="1"/>' +
+          '<g fill="' + (r() < 0.25 ? C.sky : C.aqua) + '" fill-opacity=".75">' + win + '</g>';
+        if (r() < 0.25) dec += '<path d="M' + f1(dx) + ' ' + f1(dy - th) + 'v' + f1(-B * 0.05) + '" stroke="' + C.mint + '" stroke-opacity=".6"/><circle class="blink" cx="' + f1(dx) + '" cy="' + f1(dy - th - B * 0.05) + '" r="2" fill="' + C.sky + '" style="animation-delay:' + (r() * 2).toFixed(2) + 's"/>';
+      } else if (deco === 'plants') { // holographic panels (community zone)
+        var pw = 30 + r() * 40, ph = pw * (0.55 + r() * 0.3), py = dy - ph - 8 - r() * 10, lines = '';
+        for (var k = 0; k < 3; k++) lines += 'M' + f1(dx - pw / 2 + 6) + ' ' + f1(py + 8 + k * ph * 0.22) + 'h' + f1(pw * (0.35 + r() * 0.45));
+        dec += '<g class="holo" style="animation-delay:' + (r() * 4).toFixed(2) + 's"><path d="M' + f1(dx) + ' ' + f1(dy) + 'V' + f1(py + ph) + '" stroke="' + C.mint + '" stroke-opacity=".5"/>' +
+          '<rect x="' + f1(dx - pw / 2) + '" y="' + f1(py) + '" width="' + f1(pw) + '" height="' + f1(ph) + '" rx="2" fill="url(#' + id + 'scr)" stroke="' + C.aqua + '" stroke-opacity=".55" stroke-width="1"/>' +
+          '<path d="' + lines + '" stroke="' + C.ice + '" stroke-opacity=".5" stroke-width="1.4"/></g>';
+      } else if (pick < 0.45) { // chip with pins
+        var cw = 26 + r() * 30, ch = 12 + r() * 10, pins = '';
+        for (var px = dx - cw / 2 + 4; px < dx + cw / 2 - 2; px += 6) pins += 'M' + f1(px) + ' ' + f1(dy) + 'v-3M' + f1(px) + ' ' + f1(dy - ch - 3) + 'v-3';
+        dec += '<ellipse cx="' + f1(dx) + '" cy="' + f1(dy) + '" rx="' + f1(cw) + '" ry="' + f1(ch * 0.6) + '" fill="url(#' + id + 'glow)"/>' +
+          '<path d="' + pins + '" stroke="' + C.aqua + '" stroke-opacity=".7"/>' +
+          '<rect x="' + f1(dx - cw / 2) + '" y="' + f1(dy - ch - 3) + '" width="' + f1(cw) + '" height="' + f1(ch) + '" rx="2" fill="#0e1430" stroke="' + C.mint + '" stroke-opacity=".8"/>' +
+          '<circle cx="' + f1(dx - cw / 2 + 5) + '" cy="' + f1(dy - ch + 1) + '" r="1.5" fill="' + C.sky + '"/>';
+      } else { // server rack with status LEDs
+        var rw = 20 + r() * 14, rh = B * (0.08 + r() * 0.1), leds = '';
+        for (var ly = dy - rh + 5; ly < dy - 4; ly += 6) leds += '<rect class="' + (r() < 0.2 ? 'blink' : '') + '" x="' + f1(dx - rw / 2 + 4) + '" y="' + f1(ly) + '" width="' + f1(rw * (0.3 + r() * 0.4)) + '" height="1.6" fill="' + (r() < 0.2 ? C.sky : C.aqua) + '" fill-opacity=".8" style="animation-delay:' + (r() * 2).toFixed(2) + 's"/>';
+        dec += '<rect x="' + f1(dx - rw / 2) + '" y="' + f1(dy - rh) + '" width="' + f1(rw) + '" height="' + f1(rh) + '" fill="#0a0f24" stroke="' + C.mint + '" stroke-opacity=".5"/>' + leds;
       }
     }
-    // hanging crystals on the ceiling
-    if (kind !== 'surface') {
-      var nH = Math.round(W / 420);
-      for (var hI = 0; hI < nH; hI++) {
-        var hx = (hI + 0.5 + (r() - 0.5) * 0.6) * (W / nH), hy = ceilY(hx) - 4;
-        if (nearChannel(hx, hy)) continue;
-        var hn = 1 + Math.floor(r() * 3);
-        for (var q = 0; q < hn; q++) {
-          var hw = 4 + r() * 6, hl = B * (0.05 + r() * 0.1), hxx = hx + (q - hn / 2) * hw * 2.2;
-          dec += '<polygon points="' + pts([[hxx - hw, hy], [hxx - hw * 0.7, hy + hl * 0.7], [hxx, hy + hl], [hxx + hw * 0.7, hy + hl * 0.7], [hxx + hw, hy]]) + '" fill="url(#' + id + 'ice)"/>';
-        }
+    // the ceiling of the scene below: hanging cable bundles and LED strips
+    var nH = Math.round(W / 300);
+    for (var hI = 0; hI < nH; hI++) {
+      var hx = (hI + 0.5 + (r() - 0.5) * 0.6) * (W / nH), hy = yOn(ceil, hx) - 1;
+      if (nearChannel(hx, hy)) continue;
+      if (r() < 0.5) {
+        var sag = B * (0.06 + r() * 0.08), span = 40 + r() * 80;
+        dec += '<path d="M' + f1(hx - span / 2) + ' ' + f1(hy) + 'Q' + f1(hx) + ' ' + f1(hy + sag * 2) + ' ' + f1(hx + span / 2) + ' ' + f1(hy) + '" fill="none" stroke="#1a2346" stroke-width="3"/>' +
+          '<path d="M' + f1(hx - span / 2 + 6) + ' ' + f1(hy) + 'Q' + f1(hx) + ' ' + f1(hy + sag * 1.6) + ' ' + f1(hx + span / 2 - 6) + ' ' + f1(hy) + '" fill="none" stroke="' + C.mint + '" stroke-opacity=".35" stroke-width="1.2"/>';
+      } else {
+        var sl = 30 + r() * 60;
+        dec += '<rect x="' + f1(hx - sl / 2) + '" y="' + f1(hy) + '" width="' + f1(sl) + '" height="3" fill="' + C.aqua + '" fill-opacity=".75"/>' +
+          '<ellipse cx="' + f1(hx) + '" cy="' + f1(hy + 10) + '" rx="' + f1(sl) + '" ry="14" fill="url(#' + id + 'glow)"/>';
       }
     }
     html += dec;
@@ -251,24 +235,31 @@
     var svg = svgEl(W, h, 'far-svg');
     svg.style.top = startY + 'px';
     var wl = S.deck ? 0.13 : 0.05, html = '<defs><linearGradient id="farG" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="#0a1a44"/><stop offset=".35" stop-color="#08283c"/><stop offset=".62" stop-color="#0a1a52"/><stop offset="1" stop-color="#072a3c"/></linearGradient>' +
+      '<stop offset="0" stop-color="#0a0f26"/><stop offset=".35" stop-color="#0b0c22"/><stop offset=".62" stop-color="#0a1030"/><stop offset="1" stop-color="#0b1230"/></linearGradient>' +
       '<linearGradient id="farC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.aqua + '" stop-opacity=".6"/><stop offset="1" stop-color="' + C.teal + '" stop-opacity="0"/></linearGradient></defs>';
-    ['L', 'R'].forEach(function (side) {
-      var p = [], y = -40, edge = [];
-      while (y < h + 40) { var x = W * (0.015 + r() * wl); edge.push([side === 'L' ? x : W - x, y]); y += H * (0.04 + r() * 0.07); }
-      p = side === 'L' ? [[-10, -40]].concat(edge, [[-10, h + 40]]) : [[W + 10, -40]].concat(edge, [[W + 10, h + 40]]);
-      html += '<polygon points="' + pts(p) + '" fill="url(#farG)" opacity=".9"/>';
-      html += '<polyline points="' + pts(edge) + '" fill="none" stroke="' + C.sky + '" stroke-opacity=".3" stroke-width="1.4"/>';
-      for (var i = 0; i < edge.length; i += 3) {
-        if (r() < 0.45) continue;
-        var e = edge[i], dir = side === 'L' ? 1 : -1, len = 18 + r() * 40;
-        html += '<polygon points="' + pts([[e[0], e[1] - 6], [e[0] + dir * len, e[1] - 2 - r() * 10], [e[0], e[1] + 6]]) + '" fill="url(#farC)" opacity=".7"/>';
+    ['L', 'R'].forEach(function (side) { // stepped walls of server racks
+      var y = -40, edge = [], leds = '', x = W * (0.02 + r() * wl);
+      edge.push([x, y]);
+      while (y < h + 40) {
+        var seg = H * (0.06 + r() * 0.12);
+        edge.push([x, y + seg]); y += seg;
+        x = W * (0.02 + r() * wl); edge.push([x, y]);
+        for (var ly = y - seg + 10; ly < y - 6; ly += 9) if (r() < 0.55) {
+          var lx = 6 + r() * Math.max(10, edge[edge.length - 2][0] - 26);
+          leds += '<rect x="' + f1(side === 'L' ? lx : W - lx - 12) + '" y="' + f1(ly) + '" width="' + f1(6 + r() * 14) + '" height="1.6"/>';
+        }
       }
+      var pts2 = edge.map(function (e) { return [side === 'L' ? e[0] : W - e[0], e[1]]; });
+      var poly = side === 'L' ? [[-10, -40]].concat(pts2, [[-10, h + 40]]) : [[W + 10, -40]].concat(pts2, [[W + 10, h + 40]]);
+      html += '<polygon points="' + pts(poly) + '" fill="url(#farG)" opacity=".92"/>';
+      html += '<polyline points="' + pts(pts2) + '" fill="none" stroke="' + C.mint + '" stroke-opacity=".28" stroke-width="1.2"/>';
+      html += '<g fill="' + C.aqua + '" fill-opacity=".35">' + leds + '</g>';
     });
-    // distant hanging columns
+    // distant pillars and floating interface panels
     for (var c = 0; c < Math.round(h / H) * 2; c++) {
-      var cx = W * (0.2 + r() * 0.6), cy = r() * h, cw = 10 + r() * 26, ch = H * (0.1 + r() * 0.25);
-      html += '<polygon points="' + pts([[cx - cw, cy], [cx, cy + ch], [cx + cw, cy]]) + '" fill="#0b1d4c" opacity=".35"/>';
+      var cx = W * (0.2 + r() * 0.6), cy = r() * h, cw = 8 + r() * 18, ch = H * (0.12 + r() * 0.3);
+      if (r() < 0.6) html += '<rect x="' + f1(cx) + '" y="' + f1(cy) + '" width="' + f1(cw) + '" height="' + f1(ch) + '" fill="#0c1230" opacity=".45"/>';
+      else html += '<rect x="' + f1(cx) + '" y="' + f1(cy) + '" width="' + f1(cw * 5) + '" height="' + f1(cw * 3) + '" rx="3" fill="none" stroke="' + C.mint + '" stroke-opacity=".14"/>';
     }
     svg.innerHTML = html;
     far.appendChild(svg);
@@ -303,18 +294,28 @@
     var art = S.arts[i], W = S.W, h = S.hs[i], r = rngOf(1000 + i * 31);
     var svg = svgEl(W, h, 'gen'), html = '';
     var x = S.xs[i];
-    if (art.classList.contains('art-dusk')) {
-      html += '<defs><linearGradient id="hz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.teal + '" stop-opacity="0"/><stop offset="1" stop-color="' + C.aqua + '" stop-opacity=".22"/></linearGradient></defs>';
-      html += '<rect x="0" y="' + f1(h * 0.45) + '" width="' + W + '" height="' + f1(h * 0.55) + '" fill="url(#hz)"/>';
-      var cols = ['#14457a', '#0d3061', '#091f48'];
+    if (art.classList.contains('art-dusk')) { // city of data towers over a perspective grid
+      var hz = h * 0.66;
+      html += '<defs><linearGradient id="hz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + C.mint + '" stop-opacity="0"/><stop offset="1" stop-color="' + C.mint + '" stop-opacity=".18"/></linearGradient></defs>';
+      html += '<rect x="0" y="' + f1(h * 0.4) + '" width="' + W + '" height="' + f1(hz - h * 0.4) + '" fill="url(#hz)"/>';
+      var gl = '';
+      for (var gx = -12; gx <= 12; gx++) gl += 'M' + f1(W / 2 + gx * W * 0.04) + ' ' + f1(hz) + 'L' + f1(W / 2 + gx * W * 0.22) + ' ' + f1(h);
+      for (var gy = 0; gy < 9; gy++) { var yy = hz + (h - hz) * Math.pow(gy / 8, 1.8); gl += 'M0 ' + f1(yy) + 'H' + W; }
+      html += '<path d="' + gl + '" stroke="' + C.mint + '" stroke-opacity=".22" stroke-width="1" fill="none"/>';
+      html += '<path d="M0 ' + f1(hz) + 'H' + W + '" stroke="' + C.aqua + '" stroke-opacity=".6" stroke-width="1.5"/>';
+      var cols = ['#0d1434', '#0a0f28', '#070a1c'];
       for (var L = 0; L < 3; L++) {
-        var base = h * (0.62 + L * 0.1), p = [[-10, h + 10]], xx = -10;
-        while (xx < W + 20) { p.push([xx, base - h * (0.04 + r() * (0.16 - L * 0.03))]); xx += W * (0.03 + r() * 0.06); }
-        p.push([W + 10, h + 10]);
-        html += '<polygon points="' + pts(p) + '" fill="' + cols[L] + '"/>';
-        html += '<polyline points="' + pts(p.slice(1, -1)) + '" fill="none" stroke="' + C.aqua + '" stroke-opacity="' + (0.25 - L * 0.06).toFixed(2) + '" stroke-width="1.2"/>';
+        var xx = -10, tw2, th2, win = '';
+        while (xx < W + 10) {
+          tw2 = W * (0.018 + r() * 0.03); th2 = h * (0.06 + r() * (0.22 - L * 0.05));
+          if (Math.abs(xx - x) > W * 0.05) {
+            html += '<rect x="' + f1(xx) + '" y="' + f1(hz - th2) + '" width="' + f1(tw2) + '" height="' + f1(th2) + '" fill="' + cols[L] + '" stroke="' + C.mint + '" stroke-opacity="' + (0.35 - L * 0.1).toFixed(2) + '"/>';
+            for (var wy = hz - th2 + 6; wy < hz - 4; wy += 9) if (r() < 0.25) win += '<rect x="' + f1(xx + 3 + r() * (tw2 - 8)) + '" y="' + f1(wy) + '" width="3" height="2"/>';
+          }
+          xx += tw2 + W * (0.004 + r() * 0.02);
+        }
+        html += '<g fill="' + (L === 0 ? C.aqua : C.sky) + '" fill-opacity="' + (L === 0 ? '.55' : '.35') + '">' + win + '</g>';
       }
-      for (var s = 0; s < 22; s++) html += '<circle class="blink" cx="' + f1(W * (0.25 + r() * 0.7)) + '" cy="' + f1(h * (0.66 + r() * 0.2)) + '" r="' + f1(1 + r() * 1.6) + '" fill="#bffcf1" style="animation-delay:' + (r() * 3).toFixed(2) + 's"/>';
     } else if (art.classList.contains('art-time')) {
       var t = '';
       for (var y = h * 0.18; y < h * 0.95; y += h * 0.022) {
@@ -334,7 +335,7 @@
     } else if (art.classList.contains('art-crystal') || art.classList.contains('art-garden')) {
       for (var k = 0; k < 9; k++) {
         var cx = W * (0.05 + r() * 0.9), cy = h * (0.2 + r() * 0.6), cr = 2 + r() * 3;
-        html += '<circle class="spore" cx="' + f1(cx) + '" cy="' + f1(cy) + '" r="' + f1(cr) + '" fill="' + C.aqua + '" style="animation-delay:' + (r() * 6).toFixed(2) + 's;animation-duration:' + (6 + r() * 6).toFixed(1) + 's"/>';
+        html += '<rect class="spore" x="' + f1(cx) + '" y="' + f1(cy) + '" width="' + f1(cr * 1.6) + '" height="' + f1(cr * 1.6) + '" fill="' + (k % 3 ? C.aqua : C.sky) + '" style="animation-delay:' + (r() * 6).toFixed(2) + 's;animation-duration:' + (6 + r() * 6).toFixed(1) + 's"/>';
       }
     } else if (art.classList.contains('art-join')) {
       var cx0 = W * 0.5, y1 = h * 0.47, y2 = h * 0.6, targets = [0.36, 0.5, 0.64];
@@ -342,7 +343,7 @@
       targets.forEach(function (tx) { jl += '<path d="M' + f1(cx0) + ' ' + f1(y1) + 'C' + f1(cx0) + ' ' + f1(y2) + ' ' + f1(W * tx) + ' ' + f1(y1 + h * 0.04) + ' ' + f1(W * tx) + ' ' + f1(y2 + h * 0.05) + '"/>'; });
       html += '<g fill="none" stroke="' + C.aqua + '" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 8" class="join-lines">' + jl + '</g>';
     } else if (art.classList.contains('art-portrait')) {
-      html += '<defs><linearGradient id="cone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bffcf1" stop-opacity=".16"/><stop offset="1" stop-color="#bffcf1" stop-opacity="0"/></linearGradient></defs>';
+      html += '<defs><linearGradient id="cone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6eeff" stop-opacity=".16"/><stop offset="1" stop-color="#e6eeff" stop-opacity="0"/></linearGradient></defs>';
       html += '<polygon points="' + pts([[W * 0.02, -10], [W * 0.1, -10], [W * 0.38, h * 0.9], [W * 0.02, h * 0.9]]) + '" fill="url(#cone)"/>';
     }
     svg.innerHTML = html;
@@ -427,6 +428,8 @@
     for (i = 0; i < n; i++) {
       S.streaks.push({ u: (r() - 0.5) * 0.9, len: 40 + r() * 170, v: 520 + r() * 520, ph: r() * 100000, w: 0.8 + r() * 2.6, a: 0.25 + r() * 0.55, c: r() < 0.5 ? 0 : 1 });
     }
+    S.packets = [];
+    for (i = 0; i < 26; i++) S.packets.push({ u: (r() - 0.5) * 0.5, v: 240 + r() * 260, ph: r() * 100000, len: 8 + r() * 12 });
     S.lights = [];
     for (i = 0; i < 60; i++) S.lights.push({ u: r(), ph: r(), sp: 0.04 + r() * 0.06, s: 1.4 + r() * 2.8, sw: r() * 6.28 });
     // big world glows: one on the stream and one on the content side of every scene
@@ -477,7 +480,7 @@
         }
         c.lineTo(W, baseY + H * 0.3); c.lineTo(0, baseY + H * 0.3); c.closePath();
         var ag = c.createLinearGradient(0, baseY - amp, 0, baseY + H * 0.3);
-        var ac = b === 1 ? hex(C.sky) : hex(C.mint);
+        var ac = b === 1 ? hex(C.royal) : hex(C.mint);
         ag.addColorStop(0, rgb(ac, 0)); ag.addColorStop(0.15, rgb(ac, 0.13 * sky)); ag.addColorStop(1, rgb(ac, 0));
         c.fillStyle = ag; c.fill();
       }
@@ -485,7 +488,7 @@
         var st = S.stars[s], sy = st.v * H * 1.4 - cam * 0.12;
         if (sy < -4 || sy > H) continue;
         var tw = 0.5 + 0.5 * Math.sin(t * 1.6 + st.ph);
-        c.fillStyle = 'rgba(220,250,255,' + (0.25 + 0.6 * tw) * sky + ')';
+        c.fillStyle = 'rgba(225,232,255,' + (0.25 + 0.6 * tw) * sky + ')';
         c.fillRect(st.u * W, sy, st.s, st.s);
       }
     }
@@ -503,7 +506,7 @@
       var my = ((mo.v * H - cam * mo.f - t * 12 * mo.sp) % H + H) % H;
       var mx = mo.u * W + Math.sin(t * 0.4 * mo.sp + mo.ph) * 18;
       var a = (0.18 + 0.3 * (0.5 + 0.5 * Math.sin(t * 1.2 + mo.ph))) * (mo.l === 2 ? 1 : 0.7);
-      c.fillStyle = mo.l === 1 ? 'rgba(120,190,255,' + a + ')' : 'rgba(150,255,226,' + a + ')';
+      c.fillStyle = mo.l === 1 ? 'rgba(255,150,80,' + a + ')' : 'rgba(150,180,255,' + a + ')';
       c.beginPath(); c.arc(mx, my, mo.s * (1 + travel * (mo.l === 2 ? 1.5 : 0.4)), 0, 6.283); c.fill();
     }
     c.globalCompositeOperation = 'source-over';
@@ -519,8 +522,8 @@
       x.fillStyle = g; x.fillRect(0, 0, 8, 160); return cv;
     }
     SPR = [
-      mk([[0, 'rgba(191,252,241,0)'], [0.4, 'rgba(225,255,250,.95)'], [1, 'rgba(95,240,210,0)']]),
-      mk([[0, 'rgba(90,170,255,0)'], [0.5, 'rgba(140,215,255,.85)'], [1, 'rgba(42,111,224,0)']])
+      mk([[0, 'rgba(230,238,255,0)'], [0.4, 'rgba(236,242,255,.95)'], [1, 'rgba(143,180,255,0)']]),
+      mk([[0, 'rgba(70,120,255,0)'], [0.5, 'rgba(120,160,255,.85)'], [1, 'rgba(255,138,61,0)']])
     ];
     return SPR;
   }
@@ -535,7 +538,7 @@
     if (y1 > y0) {
       // glow ribbon
       c.lineJoin = 'round'; c.lineCap = 'round';
-      var passes = [[g * 2.4, 'rgba(3,174,169,.08)'], [g * 1.1, 'rgba(31,212,160,.16)'], [g * 0.55, 'rgba(120,240,220,.22)'], [g * 0.16, 'rgba(225,255,250,.55)']];
+      var passes = [[g * 2.4, 'rgba(45,94,240,.08)'], [g * 1.1, 'rgba(58,116,255,.16)'], [g * 0.55, 'rgba(120,160,255,.22)'], [g * 0.16, 'rgba(236,242,255,.55)']];
       for (var pI = 0; pI < passes.length; pI++) {
         c.beginPath();
         for (var y = y0; y <= y1; y += 14) {
@@ -559,15 +562,26 @@
         c.globalAlpha = s.a * edge * fadeIn;
         if (Math.abs(xb - xa) < 2) c.drawImage(spr[s.c], xa - s.w / 2, ya - cam, s.w, yb - ya);
         else {
-          c.strokeStyle = s.c ? 'rgba(140,215,255,.8)' : 'rgba(225,255,250,.9)'; c.lineWidth = s.w;
+          c.strokeStyle = s.c ? 'rgba(120,160,255,.8)' : 'rgba(236,242,255,.9)'; c.lineWidth = s.w;
           c.beginPath(); c.moveTo(xa, ya - cam); c.lineTo(xb, yb - cam); c.stroke();
         }
       }
       c.globalAlpha = 1;
+      // data packets: small orange pulses travelling down the stream (TECHNO accent)
+      var P2 = H + 400, base2 = cam - 200;
+      for (var q = 0; q < S.packets.length; q += (S.lite ? 2 : 1)) {
+        var pk = S.packets[q];
+        var py = base2 + ((((t * pk.v + pk.ph) % P2) + P2) % P2);
+        if (py < S.spill.y + 40 || py > S.endY - 10) continue;
+        var px = xAt(py) + pk.u * g, sy2 = py - cam;
+        radial(c, px, sy2, 16, [255, 138, 61], 0.35);
+        c.fillStyle = 'rgba(255,196,150,.95)';
+        c.fillRect(px - 1.5, sy2 - pk.len / 2, 3, pk.len);
+      }
     }
     // spill glow
     var sp = S.spill.y - cam;
-    if (sp > -200 && sp < H + 200) radial(c, S.spill.x, sp, g * 2.2, [95, 240, 210], 0.55 + 0.1 * Math.sin(t * 2));
+    if (sp > -200 && sp < H + 200) radial(c, S.spill.x, sp, g * 2.2, [143, 180, 255], 0.55 + 0.1 * Math.sin(t * 2));
     // lake: splash, mist, rising lights
     var ly = S.lakeY - cam;
     if (ly > -300 && ly < H + 400) {
@@ -577,7 +591,7 @@
         var life = ((t * (0.6 + (k % 5) * 0.12) + k * 0.137) % 1 + 1) % 1;
         var ang = (k / 26) * Math.PI - Math.PI;
         var px = lx + Math.cos(ang) * g * (0.4 + life * 1.6), py = ly - Math.sin(-ang) * 0 - (life - life * life) * g * 2.2;
-        c.fillStyle = 'rgba(210,255,246,' + (1 - life) * 0.7 + ')';
+        c.fillStyle = 'rgba(230,238,255,' + (1 - life) * 0.7 + ')';
         c.beginPath(); c.arc(px, py, 1.2 + (1 - life) * 1.6, 0, 6.283); c.fill();
       }
       for (var j = 0; j < S.lights.length; j++) {
@@ -585,7 +599,7 @@
         var lyy = ly - life2 * H * 0.75, lxx = W * (0.08 + L.u * 0.84) + Math.sin(t * 0.8 + L.sw) * 14;
         var a2 = Math.sin(life2 * Math.PI) * 0.8;
         radial(c, lxx, lyy, L.s * 5, [120, 255, 220], a2 * 0.35);
-        c.fillStyle = 'rgba(230,255,250,' + a2 + ')';
+        c.fillStyle = 'rgba(240,244,255,' + a2 + ')';
         c.beginPath(); c.arc(lxx, lyy, L.s * 0.6, 0, 6.283); c.fill();
       }
     }

@@ -39,7 +39,7 @@ once Pages is enabled: **Settings → Pages → Source: GitHub Actions**.
 
 ## Files
 - `css/deck.css`: the whole design.
-- `js/world.js`: the world (waterfall, strata, parallax, particles).
+- `js/world.js`: the world (data stream, circuit-board layers, server walls, parallax).
 - `js/deck.js`: camera, steps, controls and windows.
 - `js/icons.js`: icons.
 - `assets/`:

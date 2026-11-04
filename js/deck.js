@@ -46,7 +46,7 @@
           var q = window.qrcode(0, 'M'); q.addData(url); q.make();
           var n = q.getModuleCount(), m = 2, d = '';
           for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) if (q.isDark(r, c)) d += 'M' + (c + m) + ' ' + (r + m) + 'h1v1h-1z';
-          el.innerHTML = '<svg viewBox="0 0 ' + (n + 2 * m) + ' ' + (n + 2 * m) + '" shape-rendering="crispEdges" role="img" aria-label="رمز QR لنموذج الانضمام"><rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#06183f"/></svg>';
+          el.innerHTML = '<svg viewBox="0 0 ' + (n + 2 * m) + ' ' + (n + 2 * m) + '" shape-rendering="crispEdges" role="img" aria-label="رمز QR لنموذج الانضمام"><rect width="100%" height="100%" fill="#fff"/><path d="' + d + '" fill="#0a1030"/></svg>';
           el.classList.add('has');
           var link = doc.createElement('small'); link.className = 'qr-url'; link.textContent = url.replace(/^https?:\/\//, '').slice(0, 42);
           el.appendChild(link);
@@ -65,7 +65,7 @@
       // drawn from the reading start (right edge in RTL) towards the end
       var d = 'M' + w + ' 5H' + (w - a) + 'L' + (w - a - k) + ' ' + (5 + k) + 'H' + (w - b + 8);
       el.innerHTML = '<svg viewBox="0 0 ' + (w + 2) + ' ' + h + '" width="' + (w + 2) + '" height="' + h + '" aria-hidden="true">' +
-        '<defs><linearGradient id="tg' + Math.random().toString(36).slice(2, 7) + '" x1="1" x2="0"><stop offset="0" stop-color="#1fd4a0"/><stop offset=".6" stop-color="#03aea9"/><stop offset="1" stop-color="#2a6fe0"/></linearGradient></defs>' +
+        '<defs><linearGradient id="tg' + Math.random().toString(36).slice(2, 7) + '" x1="1" x2="0"><stop offset="0" stop-color="#3a74ff"/><stop offset=".6" stop-color="#2d5ef0"/><stop offset="1" stop-color="#ff8a3d"/></linearGradient></defs>' +
         '<path class="tr-line" d="' + d + '" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
         '<circle class="tr-dot" cx="' + (w - 2) + '" cy="5" r="3.2"/>' +
         '<circle class="tr-node" cx="' + (w - b + 3) + '" cy="' + (5 + k) + '" r="5.5"/></svg>';
@@ -83,15 +83,6 @@
       var flow = front.cloneNode(); flow.setAttribute('class', 'ring-flow'); flow.removeAttribute('opacity');
       front.parentNode.appendChild(flow);
     }
-    // committee moons
-    $$('.moons').forEach(function (m) {
-      var n = +getComputedStyle(m).getPropertyValue('--n') || 2;
-      for (var i = 0; i < n; i++) { var s = doc.createElement('i'); s.style.setProperty('--k', i); s.style.setProperty('--n', n); m.appendChild(s); }
-    });
-    // microphone waveform
-    $$('.wave').forEach(function (w) {
-      for (var i = 0; i < 26; i++) { var b = doc.createElement('i'); b.style.animationDelay = (-Math.random() * 1.2).toFixed(2) + 's'; b.style.setProperty('--h', (0.25 + Math.random() * 0.75).toFixed(2)); w.appendChild(b); }
-    });
     // reveal order inside a scene (for staggering automatic reveals)
     scenes.forEach(function (sc) {
       var i = 0;
@@ -294,13 +285,13 @@
     d.write('<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>نافذة المقدّم · TECHNO</title><style>' +
       '@font-face{font-family:Plex;src:url("' + absUrl('assets/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2') + '")}' +
       '@font-face{font-family:Alex;src:url("' + absUrl('assets/fonts/alexandria-arabic-wght-normal.woff2') + '");font-weight:100 900}' +
-      'body{margin:0;background:#050b22;color:#eaf6ff;font:20px/1.7 Plex,system-ui,sans-serif;display:grid;grid-template-rows:auto 1fr auto;height:100vh}' +
-      'header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid #16306a;font-family:Alex}' +
-      '#t{font-size:34px;font-variant-numeric:tabular-nums;color:#5ff0d2}main{padding:18px 26px;overflow:auto}' +
-      'h1{font-family:Alex;font-size:34px;margin:.2em 0}.st{color:#8fb3d9}.nx{margin-top:18px;padding:12px 16px;border:1px solid #1d4a8a;border-radius:12px;color:#bcd3ee}' +
-      '.nx b{color:#5ff0d2}#n{font-size:24px;line-height:1.8;background:#0a1638;border-radius:14px;padding:16px 20px;margin-top:12px}' +
-      'footer{display:flex;gap:10px;padding:12px 22px;border-top:1px solid #16306a}button{font:inherit;font-size:18px;padding:10px 22px;border-radius:10px;border:1px solid #2a6fe0;background:#0b1d4c;color:#fff;cursor:pointer}' +
-      'button.p{background:linear-gradient(90deg,#1fd4a0,#2a6fe0);border:0;color:#04122a;font-weight:700}</style></head><body>' +
+      'body{margin:0;background:#04050c;color:#e9eefc;font:20px/1.7 Plex,system-ui,sans-serif;display:grid;grid-template-rows:auto 1fr auto;height:100vh}' +
+      'header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;border-bottom:1px solid #1a2346;font-family:Alex}' +
+      '#t{font-size:34px;font-variant-numeric:tabular-nums;color:#8fb4ff}main{padding:18px 26px;overflow:auto}' +
+      'h1{font-family:Alex;font-size:34px;margin:.2em 0}.st{color:#9fb0d6}.nx{margin-top:18px;padding:12px 16px;border:1px solid #24356e;border-radius:12px;color:#c4cee8}' +
+      '.nx b{color:#8fb4ff}#n{font-size:24px;line-height:1.8;background:#0b1024;border-radius:14px;padding:16px 20px;margin-top:12px}' +
+      'footer{display:flex;gap:10px;padding:12px 22px;border-top:1px solid #1a2346}button{font:inherit;font-size:18px;padding:10px 22px;border-radius:10px;border:1px solid #ff8a3d;background:#0e1530;color:#fff;cursor:pointer}' +
+      'button.p{background:linear-gradient(90deg,#3a74ff,#ff8a3d);border:0;color:#060912;font-weight:700}</style></head><body>' +
       '<header><span>TECHNO · نافذة المقدّم</span><span id="t">00:00</span></header>' +
       '<main><p class="st" id="s"></p><h1 id="h"></h1><div id="n"></div><div class="nx" id="x"></div></main>' +
       '<footer><button id="bp">السابق</button><button class="p" id="bn">التالي</button><button id="br">إعادة المؤقّت</button></footer></body></html>');

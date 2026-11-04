@@ -13,9 +13,8 @@ window.TECHNO_SETTINGS = {
   },
 
   specialization: {       // يوم التخصصات — Specialization Day
-    date: '',
+    date: '١٨–١٩ نوفمبر ٢٠٢٦',
     place: '',
-    audience: '',
   },
 
   portrait: {             // تصوير البورتريه — Portrait Day
@@ -37,11 +36,6 @@ window.TECHNO_SETTINGS = {
     date: '',
   },
 
-  interviews: {           // المقابلات (النوع يُحدَّد لاحقًا)
-    type: '',
-    goal: '',
-    date: '',
-  },
 
   recruitment: {          // فتح التسجيل في اللجان
     date: '',
