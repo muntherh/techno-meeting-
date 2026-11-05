@@ -18,10 +18,6 @@ window.TECHNO_SETTINGS = {
     place: '',
   },
 
-  portrait: {             // تصوير البورتريه — Portrait Day
-    date: '',
-    place: '',
-  },
 
   cables: {               // واير وشاحن… تدوير آمن
     place: '',            // نقطة التجميع

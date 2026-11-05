@@ -363,9 +363,7 @@
       var jl = '';
       targets.forEach(function (tx) { jl += '<path d="M' + f1(cx0) + ' ' + f1(y1) + 'C' + f1(cx0) + ' ' + f1(y2) + ' ' + f1(W * tx) + ' ' + f1(y1 + h * 0.04) + ' ' + f1(W * tx) + ' ' + f1(y2 + h * 0.05) + '"/>'; });
       html += '<g fill="none" stroke="' + C.aqua + '" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 8" class="join-lines">' + jl + '</g>';
-    } else if (art.classList.contains('art-portrait')) {
-      html += '<defs><linearGradient id="cone" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6eeff" stop-opacity=".16"/><stop offset="1" stop-color="#e6eeff" stop-opacity="0"/></linearGradient></defs>';
-      html += '<polygon points="' + pts([[W * 0.02, -10], [W * 0.1, -10], [W * 0.38, h * 0.9], [W * 0.02, h * 0.9]]) + '" fill="url(#cone)"/>';
+
     }
     svg.innerHTML = html;
     wrap.insertBefore(svg, wrap.firstChild);

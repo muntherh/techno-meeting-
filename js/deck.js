@@ -193,7 +193,6 @@
       el.classList.toggle('now', n === step);
       if (instant) el.classList.add('instant'); else el.classList.remove('instant');
     });
-    if (sc.id === 's05') { var vf = $('[data-shutter]'); if (vf) vf.classList.toggle('shot', step >= 3); }
   }
   function arrive(i) {
     scenes.forEach(function (s, k) { if (k !== i) s.classList.remove('is-here'); });
